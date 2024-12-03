@@ -34,22 +34,22 @@ npm run dev
 
 ### Dự án này bao gồm các tính năng chính sau:
 
-# 1. Quản lý Sản Phẩm
+#### 1. Quản lý Sản Phẩm
 Thêm, sửa, xóa sản phẩm trong cửa hàng.
 Xem danh sách sản phẩm và tìm kiếm sản phẩm theo tên, loại, giá.
-# 2. Quản lý Đơn Hàng
+##### 2. Quản lý Đơn Hàng
 Quản lý đơn hàng của khách hàng.
 Theo dõi tình trạng đơn hàng, cập nhật trạng thái đơn hàng.
-# 3. Quản lý Tài Khoản
+#### 3. Quản lý Tài Khoản
 Quản lý tài khoản người dùng với các quyền khác nhau (Admin, Nhân viên, Khách hàng).
 Cập nhật thông tin tài khoản và mật khẩu.
-# 4. Thống Kê
+#### 4. Thống Kê
 Xem các báo cáo thống kê về doanh thu, sản phẩm bán chạy, và tình hình đơn hàng.
-# 5. Giao Diện Người Dùng
+#### 5. Giao Diện Người Dùng
 Giao diện trực quan, dễ sử dụng với thanh điều hướng (Sidebar) và các bảng điều khiển.
-# 6. Xác Thực và Phân Quyền
+#### 6. Xác Thực và Phân Quyền
 Hệ thống phân quyền người dùng với khả năng đăng nhập, đăng ký và phân quyền cho các loại người dùng khác nhau.
-## Các Thư Viện và Công Cụ Sử Dụng
+##### Các Thư Viện và Công Cụ Sử Dụng
 
 - React: Framework chính để xây dựng giao diện người dùng.
 - Vite: Công cụ build ứng dụng.
