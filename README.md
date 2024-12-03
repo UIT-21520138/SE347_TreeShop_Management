@@ -81,11 +81,11 @@ SE347_TreeShop_Management/
     │   ├── TimeNow.jsx          # Component hiển thị thời gian hiện tại
     │   └── TypeProduct.jsx      # Component nhập loại sản phẩm trong các form
     │
-    ├── layouts/ # Các layout của ứng dụng
-    |   ├── components/         # Các component UI tái sử dụng
-    │   |        ├── Header.jsx             # Component Header, chứa thanh điều hướng hoặc logo
-    │   |        └── Sidebar.jsx            # Component Sidebar, menu điều hướng bên trái
-    |   ├── DefaultLayout.jsx  # Layout mặc định của các trang
+    ├── layouts/               # Các layout của ứng dụng
+    │   ├── components/         # Các component UI tái sử dụng
+    │   │   ├── Header.jsx             # Component Header, chứa thanh điều hướng hoặc logo
+    │   │   └── Sidebar.jsx            # Component Sidebar, menu điều hướng bên trái
+    │   ├── DefaultLayout.jsx  # Layout mặc định của các trang
     │   ├── FullLayout.jsx     # Layout đầy đủ bao gồm Header và Sidebar
     │   └── AuthLayout.jsx     # Layout cho phần quản lý
     │
@@ -118,6 +118,7 @@ SE347_TreeShop_Management/
     │   ├── UpdateProduct.jsx   # Trang cập nhật sản phẩm
     │   ├── UpdateProductType.jsx # Trang cập nhật loại sản phẩm
     │   └── UpdateRole.jsx      # Trang cập nhật vai trò người dùng
+    │
     ├── redux/                  # Cấu hình và các slice của Redux
     │   ├── store.js            # Tạo store Redux và kết nối với ứng dụng
     │   ├── slices/             # Các phần quản lý trạng thái trong Redux
@@ -125,9 +126,10 @@ SE347_TreeShop_Management/
     │   │   └── orderSlice.js   # Quản lý trạng thái đơn hàng
     │   └── selectors/          # Các actions của Redux
     │       ├── accountSelector.js
-    |       ├── orderSelector.js
-    |       └── index.js
-    ├── routes/                # Định nghĩa các route của ứng dụng
+    │       ├── orderSelector.js
+    │       └── index.js
+    │
+    ├── routes/                 # Định nghĩa các route của ứng dụng
     │   └── index.js           # Định nghĩa các routes chính trong ứng dụng
     │
     ├── data/                 
