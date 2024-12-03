@@ -63,6 +63,7 @@ Hệ thống phân quyền người dùng với khả năng đăng nhập, đăn
 ## Cấu Trúc Thư Mục
 
 Dưới đây là cấu trúc thư mục của dự án:
+```bash
 SE347_TreeShop_Management/
 ├── public/                   # Tệp tĩnh như ảnh, logo, v.v.
 │   ├── home_img.png          # Ảnh sử dụng trên trang chủ
@@ -137,4 +138,4 @@ SE347_TreeShop_Management/
     │
     ├── App.jsx                # Tệp chính của ứng dụng React
     └── main.jsx               # Tệp entry để render ứng dụng React vào DOM
-
+```
