@@ -20,7 +20,7 @@ function AddRole() {
     const [checkAll, setCheckAll] = useState(false);
 
     useEffect(() => {
-        fetch('http://localhost:301/api/function')
+        fetch('http://localhost:302/api/function')
             .then((res) => res.json())
             .then((resJson) => {
                 if (resJson.success) {
@@ -77,7 +77,7 @@ function AddRole() {
 
     function createRoles(values) {
         setLoading(true);
-        fetch('http://localhost:301/api/role', {
+        fetch('http://localhost:302/api/role', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
