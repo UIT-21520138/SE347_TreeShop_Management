@@ -38,7 +38,7 @@ function Home() {
         </p>
         <p className="text-lg ">
           3. Gọi HOTLINE hỗ trợ khách hàng:{" "}
-          <span className="underline">0987654321</span>
+          <span className="underline">Nhập số điện thoại...</span>
           {", "}
           <span className="underline">0123456789</span>
           {"."}

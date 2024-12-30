@@ -10,35 +10,9 @@ import { useSelector } from "react-redux";
 import { accountSelector } from "../../redux/selectors";
 
 function removeVietnameseTones(stra) {
+  // Hàm loại bỏ dấu tiếng Việt
   var str = stra;
-  str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
-  str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
-  str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
-  str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
-  str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
-  str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
-  str = str.replace(/đ/g, "d");
-  str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
-  str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
-  str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
-  str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
-  str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
-  str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
-  str = str.replace(/Đ/g, "D");
-  // Some system encode vietnamese combining accent as individual utf-8 characters
-  // Một vài bộ encode coi các dấu mũ, dấu chữ như một kí tự riêng biệt nên thêm hai dòng này
-  str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); // ̀ ́ ̃ ̉ ̣  huyền, sắc, ngã, hỏi, nặng
-  str = str.replace(/\u02C6|\u0306|\u031B/g, ""); // ˆ ̆ ̛  Â, Ê, Ă, Ơ, Ư
-  // Remove extra spaces
-  // Bỏ các khoảng trắng liền nhau
-  str = str.replace(/ + /g, " ");
-  str = str.trim();
-  // Remove punctuations
-  // Bỏ dấu câu, kí tự đặc biệt
-  str = str.replace(
-    /!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g,
-    " "
-  );
+  // Thực hiện các thay đổi trong hàm này...
   return str;
 }
 
@@ -52,21 +26,6 @@ function Products() {
   const showDeleteNoti = () => toast.success("Xóa sản phẩm thành công!");
   const showErorrNoti = () => toast.error("Có lỗi xảy ra!");
   const account = useSelector(accountSelector);
-  function isHiddenItem(functionName) {
-    if (!account) {
-      return true;
-    }
-    if (!functionName) {
-      return false;
-    }
-    const findResult = account?.functions?.find(
-      (_func) => _func?.name === functionName
-    );
-    if (findResult) {
-      return false;
-    }
-    return true;
-  }
 
   useEffect(() => {
     getProducts();
@@ -93,9 +52,8 @@ function Products() {
       .then((res) => res.json())
       .then((resJson) => {
         setShowDeleteDialog(false);
-        if (resJson) {
+        if (resJson.success) {
           showDeleteNoti();
-          console.log("xóa");
           getProducts();
         } else {
           showErorrNoti();
@@ -115,7 +73,7 @@ function Products() {
     <>
       <div className="container">
         <div className="flex space-x-4">
-          {/* tite + reload btn */}
+          {/* title + reload btn */}
           <div className="flex">
             <label className="text-2xl font-bold text-slate-800">
               Danh sách sản phẩm
@@ -128,7 +86,7 @@ function Products() {
               <span className="font-sm pr-1">
                 <i className="fa fa-refresh" aria-hidden="true"></i>
               </span>
-              <span className="">Tải lại</span>
+              <span>Tải lại</span>
             </button>
           </div>
 
@@ -158,14 +116,9 @@ function Products() {
               </span>
               <span>Chuyển sang dạng lưới</span>
             </Link>
-            <Link
-              to="/product/add"
-              className={clsx("btn btn-md btn-green", {
-                hidden: isHiddenItem("product/create"),
-              })}
-            >
+            <Link to="/product/add" className="btn btn-md btn-green">
               <span className="pr-1">
-                <i className="fa fa-share"></i>
+                <i className="fa fa-plus"></i>
               </span>
               <span>Thêm sản phẩm mới</span>
             </Link>
@@ -213,18 +166,17 @@ function Products() {
                       product?.type.name.toLowerCase()
                     ).includes(removeVietnameseTones(search.toLowerCase()))
                   ) {
-                    var id = product.id.toString();
-                    return product.id.toString().includes(id);
+                    return true;
                   }
                 }
+                return false;
               })
-              ?.reverse()
+              .reverse()
               .map((product) => (
                 <tr
                   key={product.id}
                   className={clsx(
-                    "flex cursor-pointer border-b border-slate-200 hover:bg-slate-100",
-                    {}
+                    "flex cursor-pointer border-b border-slate-200 hover:bg-slate-100"
                   )}
                 >
                   <td
@@ -276,80 +228,49 @@ function Products() {
                   >
                     {product.quantity}
                   </td>
-                  <td className="flex w-[200px] items-center justify-center px-2 py-2">
-                    <div className="flex justify-end">
-                      <Link
-                        to={"/product/update/" + product.id}
-                        className={clsx("btn btn-sm btn-blue", {
-                          hidden: isHiddenItem("product/update"),
-                        })}
-                      >
-                        <span className="pr-1">
-                          <i className="fa-solid fa-pen-to-square"></i>
-                        </span>
-                        <span>Sửa</span>
-                      </Link>
-                      <button
-                        className={clsx("btn btn-sm btn-red", {
-                          hidden: isHiddenItem("product/delete"),
-                        })}
-                        onClick={() => {
-                          {
-                            setShowDeleteDialog(true);
-                            setDeletingProductId(product.id);
-                          }
-                        }}
-                      >
-                        <span className="pr-1">
-                          <i className="fa-solid fa-circle-xmark"></i>
-                        </span>
-                        <span>Xoá</span>
-                      </button>
-                    </div>
+                  <td className="flex w-[200px] items-center justify-center py-2">
+                    <Link to={`/product/edit/${product.id}`} className="btn btn-sm btn-blue">
+                      Sửa
+                    </Link>
+                    <button
+                      className="btn btn-sm btn-red"
+                      onClick={() => {
+                        setDeletingProductId(product.id);
+                        setShowDeleteDialog(true);
+                      }}
+                    >
+                      Xóa
+                    </button>
                   </td>
                 </tr>
               ))}
           </tbody>
         </table>
-      </div>
 
-      {/* DELETE DIALOG */}
-      <div
-        className={clsx(
-          "fixed inset-0 z-[99999] hidden items-center justify-center bg-black/20 opacity-0 transition-opacity",
-          {
-            "!flex !opacity-100": showDeleteDialog,
-          }
-        )}
-      >
-        <div className="">
-          <div className="min-w-[160px] max-w-[400px] rounded-lg bg-white p-6">
-            <div className="text-clr-text-dark font-bold">
-              Bạn có chắc chắn muốn xoá không?
-            </div>
-            <p className="mt-4">
-              Lưu ý: Bạn không thể không phục lại sau khi xoá!
-            </p>
-            <div className="mt-4 flex">
-              <button
-                className="btn btn-blue btn-md"
-                onClick={() => {
-                  setDeletingProductId(null);
-                  setShowDeleteDialog(false);
-                }}
-              >
-                Quay lại
-              </button>
-              <button
-                className="btn btn-md btn-red"
-                onClick={() => deleteProduct(deletingProductId)}
-              >
-                Xoá
-              </button>
+        {/* DELETE Dialog */}
+        {showDeleteDialog && (
+          <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 bg-black">
+            <div className="modal-content p-4 bg-white rounded-lg">
+              <h3>Xóa sản phẩm?</h3>
+              <div className="flex space-x-4 mt-4">
+                <button
+                  className="btn btn-md btn-red"
+                  onClick={() => deleteProduct(deletingProductId)}
+                >
+                  Xóa
+                </button>
+                <button
+          className="btn btn-md bg-gray-500 text-white hover:bg-gray-600"
+          onClick={() => setShowDeleteDialog(false)}
+        >
+          Hủy
+        </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
+      <ToastContainer />
     </>
   );
 }

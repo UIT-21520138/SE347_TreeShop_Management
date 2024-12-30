@@ -27,6 +27,7 @@ function UpdateRole() {
       .then((res) => res.json())
       .then((resJson) => {
         if (resJson.success) {
+          console.log(resJson.functions);
           setFunctions(resJson.functions);
         } else {
           setFunctions([]);
@@ -51,7 +52,7 @@ function UpdateRole() {
       .catch((error) => {
         console.log(error);
       });
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     if (
@@ -60,7 +61,7 @@ function UpdateRole() {
     ) {
       setCheckAll(true);
     }
-  }, [functions, role]);
+  }, [functions, selectedFunctionIds]);
 
   const roleForm = useFormik({
     initialValues: {

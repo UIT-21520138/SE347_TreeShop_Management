@@ -92,7 +92,7 @@ function AddCustomer() {
                     onBlur={bacsicForm.handleBlur}
                     value={bacsicForm.values.name}
                     name="name"
-                    placeholder="Nguyễn Văn A"
+                    placeholder="Nhập tên khách hàng"
                   />
                   <span
                     className={clsx("text-sm text-red-500 opacity-0", {
@@ -125,7 +125,7 @@ function AddCustomer() {
                     onBlur={bacsicForm.handleBlur}
                     value={bacsicForm.values.phone}
                     name="phone"
-                    placeholder="0987654321"
+                    placeholder="Nhập số điện thoại..."
                   />
                   <span
                     className={clsx("text-sm text-red-500 opacity-0", {
