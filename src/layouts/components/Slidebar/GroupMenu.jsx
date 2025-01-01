@@ -6,7 +6,7 @@ import { accountSelector } from "../../../redux/selectors";
 
 function GroupMenu({ groupMenu, setIsSidebarOpen }) {
   const [isOpen, setIsOpen] = useState(false);
-  let MainComp = 'div';
+  let MainComp = groupMenu.children ? 'div' : Link;
 
   const isHiddenItem = (functionName) => {
     // Giả định đây là một hàm kiểm tra xem item có bị ẩn không
@@ -48,7 +48,13 @@ function GroupMenu({ groupMenu, setIsSidebarOpen }) {
             'bg-green-400': pathFirst === mainPath,
           }
         )}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          if (groupMenu.children) {
+            setIsOpen(!isOpen);
+          } else if (setIsSidebarOpen) {
+            setIsSidebarOpen(false);
+          }
+        }}
         to={!groupMenu.children ? groupMenu.main?.link : undefined}
       >
         <div className="flex items-center">
