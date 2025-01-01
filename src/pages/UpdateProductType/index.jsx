@@ -1,34 +1,31 @@
-import { Fragment, useState } from "react";
+import { Fragment, useState, useEffect } from "react";
 import * as Yup from "yup";
-import { Formik, useFormik } from "formik";
-import { Link, useNavigate } from "react-router-dom";
+import { useFormik } from "formik";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import clsx from "clsx";
-import { useParams } from "react-router-dom";
-import TimeNow from "../../components/TimeNow";
-import { useEffect } from "react";
 import "react-toastify/dist/ReactToastify.css";
+import moment from "moment";
+import TimeNow from "../../components/TimeNow";
 
 const validationSchema = Yup.object({
   name: Yup.string()
     .required("Trường này bắt buộc")
-    .max(30, "Tên loại cây dài tối đa 30 kí tự"),
+    .max(30, "Tên loại sản phẩm dài tối đa 30 kí tự"),
 });
 
 function UpdateProductType() {
   const [loading, setLoading] = useState(false);
+  const [productType, setProductType] = useState({});
+  const { id } = useParams();
+  const navigate = useNavigate();
+
   const showSuccessNoti = () =>
     toast.success("Chỉnh sửa thông tin loại sản phẩm thành công!");
-  const showErorrNoti = () => toast.error("Có lỗi xảy ra!");
+  const showErrorNoti = () => toast.error("Có lỗi xảy ra!");
 
-  const { id } = useParams();
-  const [productType, setProductType] = useState({});
   useEffect(() => {
-    callApi();
-  }, []);
-
-  function callApi() {
-    fetch("http://localhost:302/api/product-type" + "/" + id)
+    fetch(`http://localhost:302/api/product-type/${id}`)
       .then((res) => res.json())
       .then((resJson) => {
         if (resJson.success) {
@@ -37,21 +34,20 @@ function UpdateProductType() {
           setProductType({});
         }
       });
-  }
-  const bacsicForm = useFormik({
+  }, [id]);
+
+  const formik = useFormik({
     initialValues: {
-      name: productType.name,
+      name: productType.name || "",
     },
     enableReinitialize: true,
     validationSchema,
-    onSubmit: handleFormsubmit,
+    onSubmit: handleFormSubmit,
   });
 
-  const navigate = useNavigate();
-  function handleFormsubmit(values) {
-    console.log(values);
+  function handleFormSubmit(values) {
     setLoading(true);
-    fetch("http://localhost:302/api/product-type/" + id, {
+    fetch(`http://localhost:302/api/product-type/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -60,114 +56,99 @@ function UpdateProductType() {
     })
       .then((res) => res.json())
       .then((resJson) => {
+        setLoading(false);
         if (resJson.success) {
-          setLoading(false);
           showSuccessNoti();
-          setTimeout(() => {
-            navigate("/product-type");
-          }, 3000);
+          setTimeout(() => navigate("/product-type"), 3000);
         } else {
-          setLoading(false);
-          showErorrNoti();
+          showErrorNoti();
         }
       })
       .catch(() => {
         setLoading(false);
-        showErorrNoti();
+        showErrorNoti();
       });
   }
 
   return (
-    <>
-      <div className="container sm:min-w-[650px] mx-auto px-4 sm:px-6 md:px-8">
-        <div className="w-full">
-          <form
-            onSubmit={bacsicForm.handleSubmit}
-            className="mx-auto sm:mx-[10%] rounded-xl border border-slate-300 p-5"
-          >
-            <div className="mt-10 flex flex-col sm:items-center justify-center">
-              <div className="flex w-full flex-col space-y-2 text-lg">
-                <div className="form-group flex flex-col">
-                  <label className="mb-1 cursor-default text-lg font-semibold">
-                    Mã loại sản phẩm
-                  </label>
-                  <div className="text-input disabled select-none py-[5px]">
-                    {productType.id}
-                  </div>
-                </div>
+    <div className="container mx-auto px-4 sm:px-6 md:px-8">
+      <ToastContainer />
+      <div className="max-w-2xl mx-auto">
+        <form
+          onSubmit={formik.handleSubmit}
+          className="rounded-lg border border-gray-300 bg-white p-6 shadow-sm"
+        >
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Chỉnh sửa loại sản phẩm
+          </h2>
 
-                <div className="form-group flex flex-col">
-                  <label className="mb-1 mt-3 font-semibold" htmlFor="name">
-                    Tên loại sản phẩm
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    className={clsx("text-input py-[5px]", {
-                      invalid:
-                        bacsicForm.touched.name && bacsicForm.errors.name,
-                    })}
-                    onChange={bacsicForm.handleChange}
-                    onBlur={bacsicForm.handleBlur}
-                    value={bacsicForm.values.name}
-                    name="name"
-                    placeholder="Sen đá"
-                  />
-                  <span
-                    className={clsx("text-sm text-red-500 opacity-0", {
-                      "opacity-100":
-                        bacsicForm.touched.name && bacsicForm.errors.name,
-                    })}
-                  >
-                    {bacsicForm.errors.name || "No message"}
-                  </span>
-                </div>
-
-                <div className="form-group flex w-full flex-col ">
-                  <label className="mb-1 cursor-default text-lg font-semibold">
-                    Ngày thêm
-                  </label>
-                  <div className="text-input disabled select-none">
-                    <TimeNow />
-                  </div>
-                </div>
-              </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium">
+              Mã loại sản phẩm
+            </label>
+            <div className="py-2 px-3 border border-gray-300 rounded-md bg-gray-100">
+              {productType.id}
             </div>
+          </div>
 
-            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between border-t pt-6">
-              <div
-                className={clsx("flex items-center text-blue-500", {
-                  invisible: !loading,
-                })}
-              >
-                <i className="fa-solid fa-spinner animate-spin text-xl"></i>
-                <span className="text-lx pl-3 font-medium">
-                  Đang chỉnh sửa thông tin loại sản phẩm
-                </span>
-              </div>
-              <div className="mt-4 sm:mt-0 flex justify-end">
-                <Link to={"/product-type"} className="btn btn-red btn-md">
-                  <span className="pr-2">
-                    <i className="fa-solid fa-circle-xmark"></i>
-                  </span>
-                  <span>Hủy</span>
-                </Link>
-                <button
-                  type="submit"
-                  className="btn btn-blue btn-md"
-                  disabled={!bacsicForm.dirty || loading}
-                >
-                  <span className="pr-2">
-                    <i className="fa-solid fa-circle-plus"></i>
-                  </span>
-                  <span>Lưu</span>
-                </button>
-              </div>
+          <div className="mb-4">
+            <label htmlFor="name" className="block text-gray-700 font-medium">
+              Tên loại sản phẩm
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              className={clsx(
+                "w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2",
+                {
+                  "border-red-500": formik.touched.name && formik.errors.name,
+                  "focus:ring-blue-500": !formik.errors.name,
+                }
+              )}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              value={formik.values.name}
+              placeholder="Nhập tên loại sản phẩm"
+            />
+            {formik.touched.name && formik.errors.name && (
+              <p className="text-red-500 text-sm mt-1">{formik.errors.name}</p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium">
+              Thời gian chỉnh sửa
+            </label>
+            <div className="text-input disabled select-none">
+              <TimeNow/>
             </div>
-          </form>
-        </div>
+          </div>
+
+          <div className="flex justify-end space-x-4">
+            <Link
+              to="/product-type"
+              className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+            >
+              Hủy
+            </Link>
+            <button
+              type="submit"
+              disabled={!formik.dirty || loading}
+              className={clsx(
+                "px-4 py-2 text-white rounded-md",
+                {
+                  "bg-blue-500 hover:bg-blue-600": !loading,
+                  "bg-gray-400": loading,
+                }
+              )}
+            >
+              {loading ? "Đang lưu..." : "Lưu"}
+            </button>
+          </div>
+        </form>
       </div>
-    </>
+    </div>
   );
 }
 

@@ -135,7 +135,24 @@ function Orders() {
       dataIndex: "createdAt",
       key: "createdAt",
       render: (date) => moment(date).format("HH:mm:ss DD/MM/YYYY"),
+  },
+  {
+    title: "Trạng thái đơn hàng",  
+    dataIndex: "status",  
+    key: "status",
+    render: (status) => {
+      switch (status) {
+        case "pending":
+          return <span style={{ color: "orange" }}>Chờ xử lý</span>;
+        case "paid":
+          return <span style={{ color: "green" }}>Đã thanh toán</span>;
+        case "aborted":
+          return <span style={{ color: "red" }}>Hủy bỏ</span>;
+        default:
+          return <span>Không xác định</span>;
+      }
     },
+  },
     {
       title: "Hành động",
       key: "action",
@@ -187,7 +204,7 @@ function Orders() {
         rowKey="id"
         pagination={{ pageSize: 10 }}
         onRow={(record) => ({
-          onClick: () => linkToDetail(record.id), // Điều hướng đến chi tiết hóa đơn khi nhấp vào hàng
+          onClick: () => linkToDetail(record.id), 
         })}
       />
       <ToastContainer />

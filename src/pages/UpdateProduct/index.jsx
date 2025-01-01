@@ -117,7 +117,7 @@ function UpdateProduct() {
                   {product.id}
                 </div>
                 <label className="mt-10 mb-1 cursor-default text-lg font-semibold">
-                  Ngày chỉnh sửa
+                  Thời gian chỉnh sửa
                 </label>
                 <div className="text-input disabled select-none">
                   <TimeNow />

@@ -1,23 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import moment from "moment";
 
-import moment from 'moment';
 function TimeNow({ className }) {
-    //SaDam Time.Now
-    const [dt, setDt] = useState(new Date().toLocaleString());
+  const [dt, setDt] = useState(null); 
 
-    useEffect(() => {
-        let secTimer = setInterval(() => {
-            setDt(new Date().toLocaleString());
-        }, 1000);
+  useEffect(() => {
+    let secTimer = setInterval(() => {
+      setDt(new Date()); 
+    }, 1000);
 
-        return () => clearInterval(secTimer);
-    }, []);
-    ///end time
-    return (
-        <div className={className || 'py-[5px] text-xl sm:text-2xl md:text-3xl'}>
-            &ensp;
-            {moment(dt).format('HH:mm:ss DD/MM/YYYY ')}
-        </div>
-    );
+    return () => clearInterval(secTimer); 
+  }, []);
+
+  if (!dt) return null; 
+
+  return (
+    <div className={className || "py-1 text-sm sm:text-base md:text-lg"}>
+      {moment(dt).format("HH:mm:ss DD/MM/YYYY")}
+    </div>
+  );
 }
+
 export default TimeNow;

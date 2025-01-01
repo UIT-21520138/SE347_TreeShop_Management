@@ -1,7 +1,21 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Table, Button, Input, Modal, notification, Space, Typography } from "antd";
-import { PlusOutlined, ReloadOutlined, DeleteOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  Table,
+  Button,
+  Input,
+  Modal,
+  notification,
+  Space,
+  Typography,
+} from "antd";
+import {
+  PlusOutlined,
+  ReloadOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { accountSelector } from "../../redux/selectors";
 import moment from "moment";
@@ -26,7 +40,10 @@ function removeVietnameseTones(stra) {
   str = str.replace(/\u02C6|\u0306|\u031B/g, "");
   str = str.replace(/ +/g, " ");
   str = str.trim();
-  str = str.replace(/!|@|%|\^|\*|\(|\)|\+|=|<|>|\?|\/|,|\.|:|;|'|"|&|#|\[|\]|~|\$|_|`|-|{|}|\||\\/g, " ");
+  str = str.replace(
+    /!|@|%|\^|\*|\(|\)|\+|=|<|>|\?|\/|,|\.|:|;|'|"|&|#|\[|\]|~|\$|_|`|-|{|}|\||\\/g,
+    " "
+  );
   return str;
 }
 
@@ -43,20 +60,6 @@ function ProductType() {
   const openNotification = (type, message) => {
     notification[type]({ message });
   };
-
-  function isHiddenItem(functionName) {
-    if (!account) {
-      return true;
-    }
-    if (!functionName) {
-      return false;
-    }
-    const findResult = account?.functions?.find(
-      (_func) => _func?.name === functionName
-    );
-    return !findResult;
-  }
-
   useEffect(() => {
     getProductTypes();
   }, []);
@@ -154,61 +157,68 @@ function ProductType() {
       key: "actions",
       align: "center",
       render: (_, record) => (
-        <Space>
-          {!isHiddenItem("product-type/update") && (
-            <Button
-              type="link"
-              icon={<EditOutlined />}
-              onClick={() => navigate(`/product-type/update/${record.id}`)}
-            >
-              Sửa
-            </Button>
-          )}
-          {!isHiddenItem("product-type/delete") && (
-            <Button
-              type="link"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={() => {
-                setShowDeleteDialog(true);
-                setDeletingProductTypeId(record.id);
-              }}
-            >
-              Xoá
-            </Button>
-          )}
+        <Space size="middle">
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/product-type/update/${record.id}`)}
+          >
+            Sửa
+          </Button>
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => {
+              setShowDeleteDialog(true);
+              setDeletingProductTypeId(record.id);
+            }}
+          >
+            Xóa
+          </Button>
         </Space>
       ),
     },
   ];
-  
 
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
-        <Space style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+        <Space
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: "100%",
+          }}
+        >
           <Title level={3}>Danh sách loại sản phẩm</Title>
-          <Button onClick={getProductTypes} icon={<i className="fa fa-refresh" />}>
+          <Button
+            onClick={getProductTypes}
+            icon={<i className="fa fa-refresh" />}
+          >
             Tải lại
           </Button>
         </Space>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-  <Input
-    placeholder="Tìm kiếm loại sản phẩm"
-    value={search}
-    onChange={(e) => setSearch(e.target.value)}
-    style={{ width: 300 }}
-    suffix={<SearchOutlined />} // Thêm icon tìm kiếm ở cuối input
-  />
-  {!isHiddenItem("product-type/create") && (
-    <Button type="primary" onClick={() => navigate("/product-type/add")}>
-      Thêm loại sản phẩm mới
-    </Button>
-  )}
-</div>
-
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 16,
+        }}
+      >
+        <Input
+          placeholder="Tìm kiếm loại sản phẩm"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ width: 300 }}
+          suffix={<SearchOutlined />}
+        />
+        <Button type="primary" onClick={() => navigate("/product-type/add")}>
+          Thêm loại sản phẩm mới
+        </Button>
+      </div>
 
       <Table
         dataSource={filteredProductTypes}
@@ -218,15 +228,16 @@ function ProductType() {
         pagination={{ pageSize: 10 }}
       />
 
+      {/* Delete Confirmation Modal */}
       <Modal
-        title="Xác nhận xoá"
+        title="Xác nhận xóa"
         visible={showDeleteDialog}
         onCancel={() => setShowDeleteDialog(false)}
         onOk={() => deleteProductType(deletingProductTypeId)}
-        okText="Xoá"
-        cancelText="Quay lại"
+        okText="Xóa"
+        cancelText="Hủy"
       >
-        Bạn có chắc chắn muốn xoá không? Hành động này không thể hoàn tác.
+        Bạn có chắc chắn muốn xóa loại sản phẩm này không?
       </Modal>
     </div>
   );

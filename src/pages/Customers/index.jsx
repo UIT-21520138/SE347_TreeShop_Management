@@ -1,46 +1,21 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Table, Button, Input, Modal, notification, Space, Typography } from "antd";
-import {
-  PlusOutlined,
-  ReloadOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
-import { toast, ToastContainer } from "react-toastify";
-import { useSelector } from "react-redux";
-import { accountSelector } from "../../redux/selectors";
+import { PlusOutlined, ReloadOutlined, DeleteOutlined, SearchOutlined } from "@ant-design/icons";
 import "react-toastify/dist/ReactToastify.css";
 
 function Customers() {
   const { Title } = Typography;
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingCustomerId, setDeletingCustomerId] = useState(null);
-
   const [search, setSearch] = useState("");
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const account = useSelector(accountSelector);
-
   const openNotification = (type, message) => {
     notification[type]({ message });
   };
-
-  function isHiddenItem(functionName) {
-    if (!account) {
-      return true;
-    }
-    if (!functionName) {
-      return false;
-    }
-    const findResult = account?.functions?.find(
-      (_func) => _func?.name === functionName
-    );
-    return !findResult;
-  }
 
   useEffect(() => {
     getCustomers();
@@ -72,7 +47,7 @@ function Customers() {
       .then((res) => res.json())
       .then((resJson) => {
         setShowDeleteDialog(false);
-        if (resJson) {
+        if (resJson.success) {
           openNotification("success", "Xóa khách hàng thành công!");
           getCustomers();
         } else {
@@ -83,10 +58,6 @@ function Customers() {
         openNotification("error", "Có lỗi xảy ra!");
         setShowDeleteDialog(false);
       });
-  }
-
-  function LinkToDetail(id) {
-    navigate("/customer/detail/" + id);
   }
 
   const filteredCustomers = customers.filter((customer) => {
@@ -128,28 +99,17 @@ function Customers() {
       align: "center",
       render: (_, record) => (
         <Space>
-          {!isHiddenItem("customer/update") && (
-            <Button
-              type="link"
-              icon={<EditOutlined />}
-              onClick={() => navigate(`/customer/update/${record.id}`)}
-            >
-              Sửa
-            </Button>
-          )}
-          {!isHiddenItem("customer/delete") && (
-            <Button
-              type="link"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={() => {
-                setShowDeleteDialog(true);
-                setDeletingCustomerId(record.id);
-              }}
-            >
-              Xoá
-            </Button>
-          )}
+          <Button
+            type="link"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => {
+              setShowDeleteDialog(true);
+              setDeletingCustomerId(record.id);
+            }}
+          >
+            Xoá
+          </Button>
         </Space>
       ),
     },
@@ -172,15 +132,13 @@ function Customers() {
           style={{ width: 300 }}
           suffix={<SearchOutlined />}
         />
-        {!isHiddenItem("customer/create") && (
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => navigate("/customer/add")}
-          >
-            Thêm khách hàng
-          </Button>
-        )}
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => navigate("/customer/add")}
+        >
+          Thêm khách hàng
+        </Button>
       </div>
 
       <Table
@@ -190,14 +148,11 @@ function Customers() {
         loading={loading}
         pagination={{ pageSize: 10 }}
         scroll={{ y: "75vh" }}
-        onRow={(record) => ({
-          onClick: () => LinkToDetail(record.id),
-        })}
       />
 
       <Modal
         title="Xác nhận xoá"
-        visible={showDeleteDialog}
+        open={showDeleteDialog}
         onOk={() => deleteCustomer(deletingCustomerId)}
         onCancel={() => setShowDeleteDialog(false)}
         okText="Xoá"
@@ -205,8 +160,6 @@ function Customers() {
       >
         <p>Bạn có chắc chắn muốn xoá không? Hành động này không thể hoàn tác.</p>
       </Modal>
-
-      <ToastContainer />
     </div>
   );
 }
