@@ -10,7 +10,7 @@ const groupMenus = [
     {
         main: {
             iconClassname: 'fa-solid fa-house',
-            text: 'Trang chủ',
+            text: 'Tổng quan',
             link: '/',
         },
     },
