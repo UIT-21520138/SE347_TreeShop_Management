@@ -1,8 +1,8 @@
-import clsx from "clsx";
-import { useFormik } from "formik";
 import { useEffect, useState } from "react";
-import * as Yup from "yup";
+import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
+import * as Yup from "yup";
+import { Row, Col, Input, Typography } from "antd";
 import { orderActions } from "../../redux/slices/orderSlice";
 import { orderSelector } from "../../redux/selectors";
 
@@ -84,82 +84,55 @@ function CustomerInput({ setIsValid }) {
   }, [customer]);
 
   return (
-    <form className="flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 rounded-md border px-2 pt-2 shadow">
-      <div className="flex w-full sm:w-56 flex-col">
-        <label className="mb-1 font-semibold" htmlFor="phone">
-          Số điện thoại
-        </label>
-        <input
+    <Row gutter={[16, 16]} className="rounded-md border px-2 pt-2 shadow">
+      <Col xs={24} sm={8}>
+        <Typography.Text strong>Số điện thoại</Typography.Text>
+        <Input
           type="text"
-          id="phone"
-          className={clsx("text-input py-1", {
-            invalid: formik.touched.phone && formik.errors.phone,
-          })}
+          value={formik.values.phone}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          value={formik.values.phone}
           name="phone"
           placeholder="Số điện thoại"
+          status={formik.touched.phone && formik.errors.phone ? "error" : ""}
         />
-        <span
-          className={clsx("text-xs text-red-500 opacity-0", {
-            "opacity-100": formik.touched.phone && formik.errors.phone,
-          })}
-        >
-          {formik.errors.phone || "No message"}
-        </span>
-      </div>
-      <div className="flex w-full sm:w-64 flex-col">
-        <label className="mb-1 font-semibold" htmlFor="name">
-          Tên khách hàng
-        </label>
-        <input
+        <Typography.Text type="danger">
+          {formik.touched.phone && formik.errors.phone}
+        </Typography.Text>
+      </Col>
+      <Col xs={24} sm={8}>
+        <Typography.Text strong>Tên khách hàng</Typography.Text>
+        <Input
           type="text"
-          id="name"
-          className={clsx("text-input py-1", {
-            invalid: formik.touched.name && formik.errors.name,
-            "disabled pointer-events-none": isExistCustomer,
-          })}
+          value={formik.values.name}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          value={formik.values.name}
           name="name"
           placeholder="Tên khách hàng"
+          disabled={isExistCustomer}
+          status={formik.touched.name && formik.errors.name ? "error" : ""}
         />
-        <span
-          className={clsx("text-xs text-red-500 opacity-0", {
-            "opacity-100": formik.touched.name && formik.errors.name,
-          })}
-        >
-          {formik.errors.name || "No message"}
-        </span>
-      </div>
-      <div className="flex w-full sm:flex-grow flex-col">
-        <label className="mb-1 font-semibold" htmlFor="address">
-          Địa chỉ
-        </label>
-        <input
+        <Typography.Text type="danger">
+          {formik.touched.name && formik.errors.name}
+        </Typography.Text>
+      </Col>
+      <Col xs={24} sm={8}>
+        <Typography.Text strong>Địa chỉ</Typography.Text>
+        <Input
           type="text"
-          id="address"
-          className={clsx("text-input py-1", {
-            invalid: formik.touched.address && formik.errors.address,
-            "disabled pointer-events-none": isExistCustomer,
-          })}
+          value={formik.values.address}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          value={formik.values.address}
           name="address"
           placeholder="Địa chỉ"
+          disabled={isExistCustomer}
+          status={formik.touched.address && formik.errors.address ? "error" : ""}
         />
-        <span
-          className={clsx("text-xs text-red-500 opacity-0", {
-            "opacity-100": formik.touched.address && formik.errors.address,
-          })}
-        >
-          {formik.errors.address || "No message"}
-        </span>
-      </div>
-    </form>
+        <Typography.Text type="danger">
+          {formik.touched.address && formik.errors.address}
+        </Typography.Text>
+      </Col>
+    </Row>
   );
 }
 

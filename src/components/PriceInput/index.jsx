@@ -1,36 +1,36 @@
-import clsx from 'clsx';
-import PriceFormat from '../PriceFormat';
+import clsx from "clsx";
+import { InputNumber } from "antd";
 
-function PriceInput({ id, placeholder, className, touched, error, value, name, onChange, onBlur, ...props }) {
-    return (
-        <div className={clsx('relative', className)}>
-            <input
-                type="number"
-                id={id}
-                className="peer absolute opacity-0"
-                onChange={onChange}
-                onBlur={onBlur}
-                value={value}
-                name={name}
-                {...props}
-            />
-            <label
-                htmlFor={id}
-                className={clsx(
-                    'text-input relative z-30 block w-full cursor-text py-[5px] peer-focus:border-blue-500 sm:text-lg md:text-xl',
-                    {
-                        invalid: touched && error,
-                        'text-gray-400': !value,
-                    }
-                )}
-            >
-                {value ? <PriceFormat>{value}</PriceFormat> : placeholder}
-            </label>
-            <label className="lb-value absolute top-0 right-0 select-none px-[6%] py-1 text-lg text-gray-600 sm:text-xl md:text-2xl">
-                VNĐ
-            </label>
-        </div>
-    );
+function PriceInput({
+  id,
+  placeholder,
+  className,
+  value,
+  name,
+  onChange,
+  onBlur,
+  size = "middle", 
+  ...props
+}) {
+  return (
+    <div className={clsx("flex items-center", className)}>
+      {/* InputNumber từ Ant Design */}
+      <InputNumber
+        id={id}
+        value={value}
+        name={name}
+        placeholder={placeholder}
+        onChange={onChange}
+        onBlur={onBlur}
+        {...props}
+        className="w-full" 
+        size={size} 
+        min={0}
+      />
+      {/* Hiển thị VNĐ */}
+      <span className="ml-1 text-gray-500 text-sm sm:text-base">VNĐ</span>
+    </div>
+  );
 }
 
 export default PriceInput;

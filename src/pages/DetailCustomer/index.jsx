@@ -1,16 +1,18 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom";
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
+import { Button, Typography, Card, Row, Col } from "antd";
 import moment from "moment";
 import clsx from "clsx";
 import { useSelector } from "react-redux";
 import { accountSelector } from "../../redux/selectors";
 
+const { Title, Text } = Typography;
+
 function DetailCustomer() {
   const { id } = useParams();
   const [customer, setCustomer] = useState({});
   const account = useSelector(accountSelector);
+
   function isHiddenItem(functionName) {
     if (!account) {
       return true;
@@ -26,12 +28,13 @@ function DetailCustomer() {
     }
     return true;
   }
+
   useEffect(() => {
     callApi();
   }, []);
 
   function callApi() {
-    fetch("http://localhost:302/api/customer" + "/" + id)
+    fetch("http://localhost:302/api/customer/" + id)
       .then((res) => res.json())
       .then((resJson) => {
         if (resJson.success) {
@@ -41,105 +44,72 @@ function DetailCustomer() {
         }
       });
   }
+
   return (
-    <div className="container">
-      <div className="wrapper">
-        <div className="mt-4 flex flex-col sm:flex-row">
-          <div className="mt-[4%] flex flex-1 sm:basis-1/2 flex-col">
-            <label className="mb-1 cursor-default text-lg font-semibold">
-              Mã khách hàng
-            </label>
-            <div className="text-input disabled select-none py-[5px]">
-              {customer.id}
+    <div style={{ maxWidth: 800, margin: "0 auto", padding: 20 }}>
+      <Card
+        title={<Title level={3} style={{ textAlign: "center" }}>Chi tiết khách hàng</Title>}
+        bordered={false}
+      >
+        {/* Customer Details */}
+        <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
+          <Col span={12}>
+            <Text strong>Mã khách hàng</Text>
+            <div style={{ padding: 10, background: "#f5f5f5", borderRadius: 4 }}>
+              {customer.id || "-"}
             </div>
-          </div>
-        </div>
-
-        <div className="mt-2 flex flex-col sm:flex-row">
-          <div className="mt-2 flex flex-1 sm:basis-1/2 flex-col">
-            <label
-              className="mb-1 cursor-default text-lg font-semibold"
-              htmlFor="phone"
-              defaultValue={0}
-            >
-              Số điện thoại
-            </label>
-            <div className="text-input disabled select-none py-[5px]">
-              {customer.phone}
+          </Col>
+          <Col span={12}>
+            <Text strong>Số điện thoại</Text>
+            <div style={{ padding: 10, background: "#f5f5f5", borderRadius: 4 }}>
+              {customer.phone || "-"}
             </div>
-          </div>
-        </div>
+          </Col>
+        </Row>
 
-        <div className="mt-2 flex flex-col sm:flex-row">
-          <div className="mt-2 flex flex-1 sm:basis-1/2 flex-col">
-            <label
-              className="mb-1 cursor-default text-lg font-semibold"
-              htmlFor="name"
-            >
-              Tên khách hàng
-            </label>
-            <div className="text-input disabled select-none py-[5px]">
-              {customer.name}
+        <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
+          <Col span={12}>
+            <Text strong>Tên khách hàng</Text>
+            <div style={{ padding: 10, background: "#f5f5f5", borderRadius: 4 }}>
+              {customer.name || "-"}
             </div>
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-col sm:flex-row">
-          <div className="mr-2 mt-2 flex flex-1 sm:basis-1/2 flex-col">
-            <label
-              className="mb-1 cursor-default text-lg font-semibold"
-              htmlFor="date"
-            >
-              Ngày thêm
-            </label>
-            <div className="text-input disabled select-none py-[5px]">
-              {moment(customer.createdAt).format("(HH:mm:ss)     DD/MM/YYYY")}
+          </Col>
+          <Col span={12}>
+            <Text strong>Ngày thêm</Text>
+            <div style={{ padding: 10, background: "#f5f5f5", borderRadius: 4 }}>
+              {moment(customer.createdAt).format("(HH:mm:ss) DD/MM/YYYY") || "-"}
             </div>
-          </div>
-        </div>
+          </Col>
+        </Row>
 
-        <div className="mt-4 flex flex-col sm:flex-row">
-          <div className="mr-2 mt-2 flex w-full sm:basis-1/2 flex-col">
-            <label
-              className="mb-1 cursor-default text-lg font-semibold"
-              htmlFor="address"
-            >
-              Địa chỉ
-            </label>
-            <div className="text-input disabled select-none py-[5px]">
-              {customer.address}
+        <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
+          <Col span={24}>
+            <Text strong>Địa chỉ</Text>
+            <div style={{ padding: 10, background: "#f5f5f5", borderRadius: 4 }}>
+              {customer.address || "-"}
             </div>
-          </div>
-        </div>
+          </Col>
+        </Row>
 
-        <div className="float-right mt-8 mr-2 flex flex-col sm:flex-row">
-          <div className="float-left mr-5 flex flex-1 sm:basis-1 flex-col">
-            <Link to={"/customer"} className="btn btn-blue btn-md">
-              <span className="pr-1">
-                <i className="fa-solid fa-circle-xmark"></i>
-              </span>
-              <span>Quay lại</span>
+        {/* Actions */}
+        <Row justify="end" gutter={16} style={{ marginTop: 20 }}>
+          <Col>
+            <Link to="/customer">
+              <Button type="default">Quay lại</Button>
             </Link>
-          </div>
-
-          <div className="float-right flex flex-1 sm:basis-1 flex-col">
+          </Col>
+          <Col>
             <Link
               to={"/customer/update/" + customer.id}
-              className={clsx("btn btn-md btn-green", {
-                hidden: isHiddenItem("customer/update"),
-              })}
+              className={clsx({ hidden: isHiddenItem("customer/update") })}
             >
-              <span className="pr-2">
-                <i className="fa fa-share" aria-hidden="true"></i>
-              </span>
-              <span>Chỉnh sửa</span>
+              <Button type="primary">Chỉnh sửa</Button>
             </Link>
-          </div>
-        </div>
-      </div>
+          </Col>
+        </Row>
+      </Card>
     </div>
   );
 }
-//
-//
+
 export default DetailCustomer;

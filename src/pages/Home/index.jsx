@@ -33,28 +33,15 @@ function Home() {
         </p>
         <p className="text-lg">
           2. Gửi email cho phòng kỹ thuật:{" "}
-          <span className="underline">19522009@gm.uit.edu.vn</span>
+          <span className="underline">21520138@gm.uit.edu.vn</span>
           {"."}
         </p>
         <p className="text-lg ">
           3. Gọi HOTLINE hỗ trợ khách hàng:{" "}
-          <span className="underline">Nhập số điện thoại...</span>
-          {", "}
           <span className="underline">0123456789</span>
           {"."}
         </p>
-        <button
-          className="btn btn-md btn-blue"
-          onClick={() => {
-            dispatch(accountActions.logout());
-            showLogoutNoti();
-          }}
-        >
-          <span className="pr-1">
-            <i className="fa-solid fa-right-from-bracket"></i>
-          </span>
-          <span>Đăng xuất</span>
-        </button>
+
       </div>
       <img className="w-full sm:w-[40vw] " src="/home-img.jpg" />
     </div>

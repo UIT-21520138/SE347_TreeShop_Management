@@ -1,9 +1,11 @@
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import clsx from "clsx";
+import { Form, Input, Checkbox, Button, Spin, Row, Col, Typography, Card } from "antd";
+
+const { Title } = Typography;
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Trường này bắt buộc"),
@@ -12,9 +14,10 @@ const validationSchema = Yup.object({
 
 function UpdateRole() {
   const { id } = useParams();
+  const navigate = useNavigate(); // For navigation
   const [loading, setLoading] = useState(false);
   const showSuccessNoti = () => toast.success("Chỉnh sửa chức vụ thành công!");
-  const showErorrNoti = () => toast.error("Có lỗi xảy ra!");
+  const showErrorNoti = () => toast.error("Có lỗi xảy ra!");
 
   const [functions, setFunctions] = useState([]);
   const [selectedFunctionIds, setSelectedFunctionIds] = useState([]);
@@ -22,46 +25,31 @@ function UpdateRole() {
 
   const [role, setRole] = useState({});
   useEffect(() => {
-    // Get function
+    // Get functions
     fetch("http://localhost:302/api/function")
       .then((res) => res.json())
       .then((resJson) => {
         if (resJson.success) {
-          console.log(resJson.functions);
           setFunctions(resJson.functions);
         } else {
           setFunctions([]);
         }
       })
-      .catch((error) => {
-        console.log(error);
-      });
+      .catch((error) => console.log(error));
+
     // Get role
-    fetch("http://localhost:302/api/role" + "/" + id)
+    fetch(`http://localhost:302/api/role/${id}`)
       .then((res) => res.json())
       .then((resJson) => {
         if (resJson.success) {
           setRole(resJson.role);
-          setSelectedFunctionIds(
-            resJson.role?.functions?.map((func) => func._id) || []
-          );
+          setSelectedFunctionIds(resJson.role?.functions?.map((func) => func._id) || []);
         } else {
           setRole({});
         }
       })
-      .catch((error) => {
-        console.log(error);
-      });
+      .catch((error) => console.log(error));
   }, [id]);
-
-  useEffect(() => {
-    if (
-      selectedFunctionIds.length === functions.length &&
-      selectedFunctionIds.length !== 0
-    ) {
-      setCheckAll(true);
-    }
-  }, [functions, selectedFunctionIds]);
 
   const roleForm = useFormik({
     initialValues: {
@@ -73,48 +61,15 @@ function UpdateRole() {
     onSubmit: updateRoles,
   });
 
-  function isChecked(id) {
-    return selectedFunctionIds.includes(id);
-  }
-
-  function handleToggleCheckAll(e) {
-    setCheckAll(e.target.checked);
-    if (e.target.checked) {
-      setSelectedFunctionIds(functions.map((func) => func._id));
-    } else {
-      setSelectedFunctionIds([]);
-    }
-  }
-
-  function handleToggleFunc(id) {
-    if (isChecked(id)) {
-      // checked --> not checked
-      setCheckAll(false);
-      const tempArray = [...selectedFunctionIds];
-      const index = tempArray.indexOf(id);
-      if (index > -1) {
-        tempArray.splice(index, 1);
-      }
-      setSelectedFunctionIds(tempArray);
-    } else {
-      // not checked --> checked
-      if (selectedFunctionIds.length === functions.length - 1) {
-        setCheckAll(true);
-      }
-      setSelectedFunctionIds([...selectedFunctionIds, id]);
-    }
-  }
-
   function updateRoles(values) {
-    // Check values changed
-    let reqValue = {};
+    const reqValue = {};
     Object.keys(values).forEach((key) => {
       if (values[key] !== roleForm.initialValues[key]) {
         reqValue[key] = values[key];
       }
     });
     setLoading(true);
-    fetch("http://localhost:302/api/role/" + id, {
+    fetch(`http://localhost:302/api/role/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -123,160 +78,112 @@ function UpdateRole() {
     })
       .then((res) => res.json())
       .then((resJson) => {
+        setLoading(false);
         if (resJson.success) {
-          setLoading(false);
           showSuccessNoti();
+          navigate("/role"); // Redirect to Role page after success
         } else {
-          setLoading(false);
-          showErorrNoti();
+          showErrorNoti();
         }
       })
       .catch(() => {
         setLoading(false);
-        showErorrNoti();
+        showErrorNoti();
       });
   }
 
   return (
-    <div className="container h-full sm:min-w-[650px] md:min-w-[790px]">
-      <form
-        className="mx-auto sm:max-w-[600px] md:max-w-[800px]"
-        onSubmit={roleForm.handleSubmit}
+    <div style={{ maxWidth: 800, margin: "0 auto", padding: 20 }}>
+      <Title level={3} style={{ textAlign: "center", marginBottom: 20 }}>
+        Chỉnh sửa chức vụ
+      </Title>
+      <Form
+        onFinish={roleForm.handleSubmit}
+        layout="vertical"
+        style={{ background: "#fff", padding: 20, borderRadius: 8 }}
       >
-        <div className="mt-5 flex flex-col sm:flex-row items-center justify-center space-x-0 sm:space-x-4">
-          <div className="w-full sm:w-[300px]">
-            <label
-              htmlFor="role-name"
-              className="mb-2 inline-block font-semibold"
+        {/* Two-column layout for role name and description */}
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              label={<span style={{ fontWeight: "bold" }}>Tên chức vụ</span>}
+              validateStatus={roleForm.touched.name && roleForm.errors.name ? "error" : ""}
+              help={roleForm.touched.name && roleForm.errors.name}
             >
-              Chức vụ:
-            </label>
-            <input
-              type="text"
-              id="role-name"
-              className={clsx("text-input w-full py-[5px]", {
-                invalid: roleForm.touched.name && roleForm.errors.name,
-              })}
-              placeholder="Tên chức vụ"
-              onChange={roleForm.handleChange}
-              onBlur={roleForm.handleBlur}
-              value={roleForm.values.name}
-              name="name"
-            />
-            <span
-              className={clsx("text-sm text-red-500 opacity-0", {
-                "opacity-100": roleForm.touched.name && roleForm.errors.name,
-              })}
+              <Input
+                name="name"
+                placeholder="Tên chức vụ"
+                onChange={roleForm.handleChange}
+                onBlur={roleForm.handleBlur}
+                value={roleForm.values.name}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label={<span style={{ fontWeight: "bold" }}>Mô tả chức vụ</span>}
+              validateStatus={roleForm.touched.description && roleForm.errors.description ? "error" : ""}
+              help={roleForm.touched.description && roleForm.errors.description}
             >
-              {roleForm.errors.name || "No message"}
-            </span>
-          </div>
-          <div className="mt-4 sm:mt-0 flex-1">
-            <label
-              htmlFor="role-description"
-              className="mb-2 inline-block font-semibold"
-            >
-              Mô tả chức vụ:
-            </label>
-            <input
-              type="text"
-              id="role-description"
-              className={clsx("text-input w-full py-[5px]", {
-                invalid:
-                  roleForm.touched.description && roleForm.errors.description,
-              })}
-              placeholder="Mô tả chức vụ"
-              onChange={roleForm.handleChange}
-              onBlur={roleForm.handleBlur}
-              value={roleForm.values.description}
-              name="description"
-            />
-            <span
-              className={clsx("text-sm text-red-500 opacity-0", {
-                "opacity-100":
-                  roleForm.touched.description && roleForm.errors.description,
-              })}
-            >
-              {roleForm.errors.description || "No message"}
-            </span>
-          </div>
-        </div>
+              <Input
+                name="description"
+                placeholder="Mô tả chức vụ"
+                onChange={roleForm.handleChange}
+                onBlur={roleForm.handleBlur}
+                value={roleForm.values.description}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
 
-        <div className="mt-5 flex flex-col sm:flex-row justify-center">
-          <div className="m-auto !h-[400px] w-full overflow-y-scroll rounded border border-gray-300 px-5 py-5 text-lg">
+        {/* Permissions section */}
+        <Card title="Chọn các quyền" style={{ marginTop: 20 }}>
+          <Row gutter={[16, 16]}>
             {functions.map((func, index) => (
-              <div
-                className="flex cursor-pointer items-center border-b border-slate-300 px-2 hover:bg-slate-100"
-                key={index}
-              >
-                <input
-                  type="checkbox"
-                  className="accent-blue-500"
-                  id={"function-input-" + func._id}
-                  name={func.displayName}
-                  checked={isChecked(func._id)}
-                  onChange={() => handleToggleFunc(func._id)}
-                />
-
-                <label
-                  htmlFor={"function-input-" + func._id}
-                  className="block flex-1 py-3 pl-8 "
+              <Col span={8} key={index}>
+                <Checkbox
+                  onChange={() => {
+                    if (selectedFunctionIds.includes(func._id)) {
+                      setSelectedFunctionIds(selectedFunctionIds.filter((id) => id !== func._id));
+                    } else {
+                      setSelectedFunctionIds([...selectedFunctionIds, func._id]);
+                    }
+                  }}
+                  checked={selectedFunctionIds.includes(func._id)}
                 >
                   {func.displayName}
-                </label>
-              </div>
+                </Checkbox>
+              </Col>
             ))}
-          </div>
-        </div>
+          </Row>
+        </Card>
 
-        <div className="mt-5 flex flex-col sm:flex-row items-center justify-between">
-          <div className="flex cursor-pointer items-center text-lg mb-4 sm:mb-0">
-            <input
-              type="checkbox"
-              className="accent-blue-500"
-              id="checkall"
+        {/* Footer actions */}
+        <Row justify="space-between" style={{ marginTop: 20 }}>
+          <Col>
+            <Checkbox
               checked={checkAll}
-              onChange={handleToggleCheckAll}
-            />
-            <label htmlFor="checkall" className="inline-block py-3 pl-5">
+              onChange={(e) => {
+                setCheckAll(e.target.checked);
+                setSelectedFunctionIds(e.target.checked ? functions.map((func) => func._id) : []);
+              }}
+            >
               Chọn tất cả
-            </label>
-          </div>
-
-          <div className="flex flex-col sm:flex-row">
-            <div
-              className={clsx(
-                "mb-4 sm:mb-0 mr-0 sm:mr-3 flex items-center text-blue-500",
-                {
-                  invisible: !loading,
-                }
-              )}
-            >
-              <i className="fa-solid fa-spinner animate-spin text-xl"></i>
-              <span className="text-lx pl-3 font-medium">
-                Đang chỉnh sửa chức vụ
-              </span>
+            </Checkbox>
+          </Col>
+          <Col>
+            <div style={{ display: "flex", gap: 16 }}>
+              <Link to="/role">
+                <Button danger>Hủy</Button>
+              </Link>
+              <Button type="primary" htmlType="submit" disabled={loading}>
+                {loading ? <Spin size="small" style={{ marginRight: 8 }} /> : null}
+                Lưu
+              </Button>
             </div>
-            <Link to={"/role/"} className="btn btn-red btn-md">
-              <span className="pr-1">
-                <i className="fa-solid fa-circle-xmark"></i>
-              </span>
-              <span className="">Hủy</span>
-            </Link>
-
-            <button
-              type="submit"
-              className="btn btn-blue btn-md"
-              disabled={loading}
-            >
-              <span className="pr-1">
-                <i className="fa-solid fa-circle-plus"></i>
-              </span>
-              <span className="">Lưu</span>
-            </button>
-          </div>
-        </div>
-      </form>
+          </Col>
+        </Row>
+      </Form>
     </div>
   );
 }

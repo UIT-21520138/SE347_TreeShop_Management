@@ -1,13 +1,23 @@
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import * as Yup from "yup";
-import { Formik, useFormik } from "formik";
+import { useFormik } from "formik";
 import { Link, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import clsx from "clsx";
+import {
+  Form,
+  Input,
+  Button,
+  Typography,
+  notification,
+  Row,
+  Col,
+  Spin,
+} from "antd";
 import TimeNow from "../../components/TimeNow";
+import AccountRoleInput from "../../components/AccountRoleInput";
 import "react-toastify/dist/ReactToastify.css";
 
-import AccountRoleInput from "../../components/AccountRoleInput";
+const { Title } = Typography;
+
 const validationSchema = Yup.object({
   role: Yup.string().required("Trường này bắt buộc"),
   name: Yup.string()
@@ -16,24 +26,31 @@ const validationSchema = Yup.object({
     .max(30, "Tên dài tối đa 30 kí tự"),
   email: Yup.string()
     .required("Trường này bắt buộc")
-    .matches(
-      /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
-      "Email sai không đúng định dạng"
-    ),
+    .email("Email sai không đúng định dạng"),
   username: Yup.string().required("Vui lòng nhập tên tài tài khoản!"),
   password: Yup.string()
-    .required("Vui lòng nhập nhập mật khẩu!")
+    .required("Vui lòng nhập mật khẩu!")
     .min(6, "Mật khẩu quá ngắn! mật khẩu phải có ít nhất 6 kí tự"),
   RePassword: Yup.string()
-    .required("Vui lòng nhập nhập lại mật khẩu!")
+    .required("Vui lòng nhập lại mật khẩu!")
     .oneOf([Yup.ref("password"), null], "Nhập lại mật khẩu không đúng"),
 });
 
 function AddAccount() {
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
   const showSuccessNoti = () =>
-    toast.success("Thêm thông tin khách hàng thành công!");
-  const showErorrNoti = () => toast.error("Có lỗi xảy ra!");
+    notification.success({
+      message: "Thành công",
+      description: "Thêm thông tin tài khoản thành công!",
+    });
+
+  const showErrorNoti = () =>
+    notification.error({
+      message: "Lỗi",
+      description: "Có lỗi xảy ra!",
+    });
 
   const bacsicForm = useFormik({
     initialValues: {
@@ -45,12 +62,10 @@ function AddAccount() {
       RePassword: "",
     },
     validationSchema,
-    onSubmit: handleFormsubmit,
+    onSubmit: handleFormSubmit,
   });
 
-  const navigate = useNavigate();
-
-  function handleFormsubmit(values) {
+  function handleFormSubmit(values) {
     setLoading(true);
     fetch("http://localhost:302/api/account", {
       method: "POST",
@@ -61,269 +76,186 @@ function AddAccount() {
     })
       .then((res) => res.json())
       .then((resJson) => {
+        setLoading(false);
         if (resJson.success) {
-          setLoading(false);
           showSuccessNoti();
-          bacsicForm.resetForm();
-          bacsicForm.values.RePassword = "";
+          navigate("/account"); // Redirect to the Account page after success
         } else {
-          setLoading(false);
-          console.log(values);
-          showErorrNoti();
+          showErrorNoti();
         }
       })
       .catch(() => {
         setLoading(false);
-        console.log(values);
-        showErorrNoti();
+        showErrorNoti();
       });
   }
 
   return (
-    <>
-      <div className="container">
-        <div className="w-full">
-          <form onSubmit={bacsicForm.handleSubmit}>
-            {/* <h1 className="text-center text-xl font-bold leading-tight tracking-tight text-gray-900  md:text-2xl">
-                            ĐĂNG KÝ TÀI KHOẢN
-                        </h1> */}
-            <div className="mt-4 flex flex-col sm:flex-row">
-              <div className="mr-8 flex w-full sm:w-1/2 md:w-1/3 flex-col space-y-2 text-base sm:text-lg md:text-xl">
-                <div className="form-group flex flex-col">
-                  <label
-                    htmlFor="name"
-                    className="mb-1 select-none font-semibold text-gray-900 text-base sm:text-lg md:text-xl"
-                  >
-                    Tên nhân viên
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    id="name"
-                    className={clsx(
-                      "focus:ring-primary-600 focus:border-primary-600 block w-full rounded-lg border border-gray-300 p-2.5 text-gray-900 text-base sm:text-sm md:text-lg",
-                      {
-                        invalid:
-                          bacsicForm.touched.name && bacsicForm.errors.name,
-                      }
-                    )}
-                    onChange={bacsicForm.handleChange}
-                    onBlur={bacsicForm.handleBlur}
-                    value={bacsicForm.values.name}
-                    placeholder="Tên nhân viên"
-                  />
-                  <span
-                    className={clsx("text-sm text-red-500 opacity-0", {
-                      "opacity-100":
-                        bacsicForm.touched.name && bacsicForm.errors.name,
-                    })}
-                  >
-                    {bacsicForm.errors.name || "No message"}
-                  </span>
-                </div>
+    <div style={{ maxWidth: 800, margin: "0 auto", padding: 20 }}>
+      <Title level={3} style={{ textAlign: "center", marginBottom: 20 }}>
+        Thêm tài khoản mới
+      </Title>
+      <Form
+        onFinish={bacsicForm.handleSubmit}
+        layout="vertical"
+        style={{ background: "#fff", padding: 20, borderRadius: 8 }}
+      >
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              label={<span style={{ fontWeight: "bold" }}>Tên nhân viên</span>}
+              validateStatus={
+                bacsicForm.touched.name && bacsicForm.errors.name ? "error" : ""
+              }
+              help={bacsicForm.touched.name && bacsicForm.errors.name}
+            >
+              <Input
+                name="name"
+                placeholder="Tên nhân viên"
+                onChange={bacsicForm.handleChange}
+                onBlur={bacsicForm.handleBlur}
+                value={bacsicForm.values.name}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label={<span style={{ fontWeight: "bold" }}>Địa chỉ email</span>}
+              validateStatus={
+                bacsicForm.touched.email && bacsicForm.errors.email
+                  ? "error"
+                  : ""
+              }
+              help={bacsicForm.touched.email && bacsicForm.errors.email}
+            >
+              <Input
+                name="email"
+                placeholder="Địa chỉ email"
+                onChange={bacsicForm.handleChange}
+                onBlur={bacsicForm.handleBlur}
+                value={bacsicForm.values.email}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
 
-                <div className="form-group flex flex-col">
-                  <label
-                    htmlFor="email"
-                    className="mb-1 select-none font-semibold text-gray-900 text-base sm:text-lg md:text-xl"
-                  >
-                    Địa chỉ email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    id="email"
-                    className={clsx(
-                      "focus:ring-primary-600 focus:border-primary-600 block w-full rounded-lg border border-gray-300 p-2.5 text-gray-900 text-base sm:text-sm md:text-lg",
-                      {
-                        invalid:
-                          bacsicForm.touched.email && bacsicForm.errors.email,
-                      }
-                    )}
-                    onChange={bacsicForm.handleChange}
-                    onBlur={bacsicForm.handleBlur}
-                    value={bacsicForm.values.email}
-                    placeholder="Địa chi email"
-                  />
-                  <span
-                    className={clsx("text-sm text-red-500 opacity-0", {
-                      "opacity-100":
-                        bacsicForm.touched.email && bacsicForm.errors.email,
-                    })}
-                  >
-                    {bacsicForm.errors.email || "No message"}
-                  </span>
-                </div>
-                <div className="form-group flex flex-col">
-                  <label
-                    htmlFor="role"
-                    className="mb-1 select-none font-semibold text-gray-900 text-base sm:text-lg md:text-xl"
-                  >
-                    Chức vụ
-                  </label>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              label={<span style={{ fontWeight: "bold" }}>Chức vụ</span>}
+              validateStatus={
+                bacsicForm.touched.role && bacsicForm.errors.role ? "error" : ""
+              }
+              help={bacsicForm.touched.role && bacsicForm.errors.role}
+            >
+              <AccountRoleInput
+                name="role"
+                placeholder="Chọn chức vụ"
+                onChange={bacsicForm.handleChange}
+                onBlur={bacsicForm.handleBlur}
+                value={bacsicForm.values.role}
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label={<span style={{ fontWeight: "bold" }}>Tài khoản</span>}
+              validateStatus={
+                bacsicForm.touched.username && bacsicForm.errors.username
+                  ? "error"
+                  : ""
+              }
+              help={bacsicForm.touched.username && bacsicForm.errors.username}
+            >
+              <Input
+                name="username"
+                placeholder="Tên tài khoản"
+                onChange={bacsicForm.handleChange}
+                onBlur={bacsicForm.handleBlur}
+                value={bacsicForm.values.username}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
 
-                  <AccountRoleInput
-                    id="role"
-                    className={clsx(
-                      "text-input cursor-pointer py-[5px] text-base sm:text-sm md:text-lg",
-                      {
-                        invalid:
-                          bacsicForm.touched.role && bacsicForm.errors.role,
-                      }
-                    )}
-                    onChange={bacsicForm.handleChange}
-                    onBlur={bacsicForm.handleBlur}
-                    value={bacsicForm.values.role}
-                    name="role"
-                  />
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              label={<span style={{ fontWeight: "bold" }}>Mật khẩu</span>}
+              validateStatus={
+                bacsicForm.touched.password && bacsicForm.errors.password
+                  ? "error"
+                  : ""
+              }
+              help={bacsicForm.touched.password && bacsicForm.errors.password}
+            >
+              <Input.Password
+                name="password"
+                placeholder="Mật khẩu"
+                onChange={bacsicForm.handleChange}
+                onBlur={bacsicForm.handleBlur}
+                value={bacsicForm.values.password}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label={
+                <span style={{ fontWeight: "bold" }}>Nhập lại mật khẩu</span>
+              }
+              validateStatus={
+                bacsicForm.touched.RePassword && bacsicForm.errors.RePassword
+                  ? "error"
+                  : ""
+              }
+              help={
+                bacsicForm.touched.RePassword && bacsicForm.errors.RePassword
+              }
+            >
+              <Input.Password
+                name="RePassword"
+                placeholder="Nhập lại mật khẩu"
+                onChange={bacsicForm.handleChange}
+                onBlur={bacsicForm.handleBlur}
+                value={bacsicForm.values.RePassword}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
 
-                  <span
-                    className={clsx("text-sm text-red-500 opacity-0", {
-                      "opacity-100":
-                        bacsicForm.touched.role && bacsicForm.errors.role,
-                    })}
-                  >
-                    {bacsicForm.errors.role || "No message"}
-                  </span>
-                </div>
-              </div>
-              <div className="mr-8 flex w-full sm:w-1/2 md:w-1/3 flex-col space-y-2 text-base sm:text-lg md:text-xl">
-                <div className="form-group flex flex-col">
-                  <label
-                    htmlFor="username"
-                    className="mb-1 select-none font-semibold text-gray-900 text-base sm:text-lg md:text-xl"
-                  >
-                    Tài khoản
-                  </label>
-                  <input
-                    type="text"
-                    name="username"
-                    id="username"
-                    className={clsx(
-                      "focus:ring-primary-600 focus:border-primary-600 block w-full rounded-lg border border-gray-300 p-2.5 text-gray-900 text-base sm:text-sm md:text-lg",
-                      {
-                        invalid:
-                          bacsicForm.touched.username &&
-                          bacsicForm.errors.username,
-                      }
-                    )}
-                    onChange={bacsicForm.handleChange}
-                    onBlur={bacsicForm.handleBlur}
-                    value={bacsicForm.values.username}
-                    placeholder="Tên tài khoản"
-                  />
-                  <span
-                    className={clsx("text-sm text-red-500 opacity-0", {
-                      "opacity-100":
-                        bacsicForm.touched.username &&
-                        bacsicForm.errors.username,
-                    })}
-                  >
-                    {bacsicForm.errors.username || "No message"}
-                  </span>
-                </div>
+        <Form.Item
+          label={<span style={{ fontWeight: "bold" }}>Ngày thêm</span>}
+        >
+          <div
+            style={{
+              background: "#f5f5f5",
+              padding: 10,
+              borderRadius: 8,
+              textAlign: "center",
+            }}
+          >
+            <TimeNow />
+          </div>
+        </Form.Item>
 
-                <div className="form-group flex flex-col">
-                  <label
-                    htmlFor="password"
-                    className="mb-1 select-none font-semibold text-gray-900 text-base sm:text-lg md:text-xl"
-                  >
-                    Mật khẩu
-                  </label>
-                  <input
-                    type="password"
-                    name="password"
-                    id="password"
-                    className="focus:ring-primary-600 focus:border-primary-600 block w-full rounded-lg border border-gray-300 p-2.5 text-gray-900 text-base sm:text-sm md:text-lg"
-                    onChange={bacsicForm.handleChange}
-                    onBlur={bacsicForm.handleBlur}
-                    value={bacsicForm.values.password}
-                    placeholder="Mật khẩu"
-                  />
-                  <span
-                    className={clsx("text-sm text-red-500 opacity-0", {
-                      "opacity-100":
-                        bacsicForm.touched.password &&
-                        bacsicForm.errors.password,
-                    })}
-                  >
-                    {bacsicForm.errors.password || "No message"}
-                  </span>
-                </div>
-                <div className="form-group flex flex-col ">
-                  <label
-                    htmlFor="RePassword"
-                    className="mb-1 select-none font-semibold text-gray-900 text-base sm:text-lg md:text-xl"
-                  >
-                    Nhập lại mật khẩu
-                  </label>
-                  <input
-                    type="password"
-                    name="RePassword"
-                    id="RePassword"
-                    onChange={bacsicForm.handleChange}
-                    onBlur={bacsicForm.handleBlur}
-                    value={bacsicForm.values.RePassword}
-                    placeholder="Nhập lại mật khẩu"
-                    className="focus:ring-primary-600 focus:border-primary-600 block w-full rounded-lg border border-gray-300 p-2.5 text-gray-900 text-base sm:text-sm md:text-lg"
-                  />
-                  <span
-                    className={clsx("text-sm text-red-500 opacity-0", {
-                      "opacity-100":
-                        bacsicForm.touched.RePassword &&
-                        bacsicForm.errors.RePassword,
-                    })}
-                  >
-                    {bacsicForm.errors.RePassword || "No message"}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 flex flex-col sm:flex-row">
-              <div className="form-group mr-4 mt-3 flex basis-1/2 flex-col ">
-                <label className="mb-1 cursor-default select-none text-lg sm:text-xl md:text-2xl font-semibold">
-                  Ngày thêm
-                </label>
-                <div className="rounded border border-slate-300 bg-slate-50 px-2 outline-none">
-                  <TimeNow />
-                </div>
-              </div>
-              {/* PRICE */}
-            </div>
-            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between border-t pt-6">
-              <div
-                className={clsx("flex items-center text-blue-500", {
-                  invisible: !loading,
-                })}
-              >
-                <i className="fa-solid fa-spinner animate-spin text-xl"></i>
-                <span className="text-lx pl-3 font-medium">
-                  Đang tạo sản phẩm
-                </span>
-              </div>
-              <div className="flex mt-4 sm:mt-0">
-                <Link to={"/product"} className="btn btn-red btn-md">
-                  <span className="pr-2">
-                    <i className="fa-solid fa-circle-xmark"></i>
-                  </span>
-                  <span>Hủy</span>
-                </Link>
-                <button
-                  type="submit"
-                  className="btn btn-blue btn-md"
-                  disabled={!bacsicForm.dirty || loading}
-                >
-                  <span className="pr-2">
-                    <i className="fa-solid fa-circle-plus"></i>
-                  </span>
-                  <span>Thêm</span>
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </>
+        <Row justify="space-between" style={{ marginTop: 20 }}>
+          <Col>
+            <Link to="/account">
+              <Button danger>Hủy</Button>
+            </Link>
+          </Col>
+          <Col>
+            <Button type="primary" htmlType="submit" disabled={loading}>
+              {loading ? (
+                <Spin size="small" style={{ marginRight: 8 }} />
+              ) : null}
+              Thêm
+            </Button>
+          </Col>
+        </Row>
+      </Form>
+    </div>
   );
 }
 

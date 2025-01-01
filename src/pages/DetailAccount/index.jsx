@@ -1,149 +1,112 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom";
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { Typography, Row, Col, Button, Card } from "antd";
 import moment from "moment";
-import { date } from "yup";
+
+const { Title } = Typography;
 
 function DetailAccount() {
   const { id } = useParams();
-  const [account, setAccount] = useState([]);
+  const [account, setAccount] = useState({});
+
   useEffect(() => {
-    callApi();
+    fetchAccountDetails();
   }, []);
 
-  function callApi() {
-    fetch("http://localhost:302/api/account/" + id)
+  function fetchAccountDetails() {
+    fetch(`http://localhost:302/api/account/${id}`)
       .then((res) => res.json())
       .then((resJson) => {
         if (resJson.success) {
           setAccount(resJson.account);
-          console.log(account.role?.name);
         } else {
           setAccount({});
         }
-      });
+      })
+      .catch((error) => console.error("Error fetching account:", error));
   }
+
   return (
-    <>
-      <div className="container">
-        <div className="w-full sm:w-3/4 md:w-1/2 mx-auto">
-          <form>
-            {/* <h1 className="text-center text-xl font-bold leading-tight tracking-tight text-gray-900  md:text-2xl">
-                        ĐĂNG KÝ TÀI KHOẢN
-                    </h1> */}
-            <div className="mt-4 flex flex-col sm:flex-row">
-              <div className="mr-8 flex w-full sm:w-1/2 flex-col space-y-2 text-lg">
-                <div className="form-group flex flex-col ">
-                  <label className="mb-1 select-none  font-semibold text-gray-900  ">
-                    Tên nhân viên
-                  </label>
-                  <div className="text-input disabled select-none py-[5px]">
-                    {account.name}
-                  </div>
-                </div>
-                <div className="form-group flex flex-col">
-                  <label
-                    htmlFor="email"
-                    className="mb-1 select-none  font-semibold text-gray-900  "
-                  >
-                    Địa chỉ email
-                  </label>
-                  <div className="text-input disabled select-none py-[5px]">
-                    {account.email}
-                  </div>
-                </div>
-                <div className="form-group flex flex-col">
-                  <label
-                    className="mb-1 select-none  font-semibold text-gray-900 "
-                    htmlFor="type"
-                  >
-                    Chức vụ
-                  </label>
-
-                  <div className="text-input disabled select-none py-[5px]">
-                    {account.role?.name}
-                  </div>
-                </div>
-              </div>
-              <div className="mr-8 flex w-full sm:w-1/2 flex-col space-y-2 text-lg">
-                <div className="form-group flex flex-col ">
-                  <label
-                    htmlFor="account"
-                    className="mb-1 select-none  font-semibold text-gray-900  "
-                  >
-                    Tài khoản
-                  </label>
-                  <div className="text-input disabled select-none py-[5px]">
-                    {account.username}
-                  </div>
-                </div>
-
-                <div className="form-group flex flex-col ">
-                  <label
-                    htmlFor="password"
-                    className="mb-1 select-none  font-semibold text-gray-900  "
-                  >
-                    Mật khẩu
-                  </label>
-                  <div className="text-input disabled select-none py-[5px]">
-                    ******
-                  </div>
-                </div>
-                <div className="form-group flex flex-col ">
-                  <label
-                    htmlFor="password"
-                    className="mb-1 select-none  font-semibold text-gray-900  "
-                  >
-                    Nhập lại mật khẩu
-                  </label>
-                  <div className="text-input disabled select-none py-[5px]">
-                    ******
-                  </div>
-                </div>
+    <div style={{ maxWidth: 800, margin: "0 auto", padding: 20 }}>
+      <Title level={3} style={{ textAlign: "center", marginBottom: 20 }}>
+        Chi tiết tài khoản
+      </Title>
+      <Card style={{ borderRadius: 8, padding: 20, background: "#fff" }}>
+        <Row gutter={16}>
+          <Col span={12}>
+            <div style={{ marginBottom: 16 }}>
+              <Typography.Text strong>Tên nhân viên:</Typography.Text>
+              <div style={{ background: "#f5f5f5", padding: 8, borderRadius: 4 }}>
+                {account.name || "-"}
               </div>
             </div>
-            <div className="mt-4 flex flex-col sm:flex-row">
-              <div className="form-group mr-4 mt-3 flex w-full sm:w-1/2 flex-col ">
-                <label className="mb-1 cursor-default select-none text-lg font-semibold">
-                  Ngày thêm
-                </label>
-                <div className="text-input disabled select-none py-[5px]">
-                  {moment(account.createdAt).format(
-                    "(HH:mm:ss)     DD/MM/YYYY"
-                  )}
-                </div>
-              </div>
-              {/* PRICE */}
-            </div>
-            <div className="float-right mt-8 mr-2 flex flex-col sm:flex-row">
-              <div className="float-left mr-5 flex w-full sm:w-1/2 flex-col">
-                <Link to={"/account"} className="btn btn-blue btn-md">
-                  <span className="pr-1">
-                    <i className="fa-solid fa-circle-xmark"></i>
-                  </span>
-                  <span>Quay lại</span>
-                </Link>
-              </div>
-
-              <div className="float-right flex w-full sm:w-1/2 flex-col">
-                <Link
-                  to={"/account/update/" + account.id}
-                  className="btn btn-md btn-green"
-                >
-                  <span className="pr-2">
-                    <i className="fa fa-share" aria-hidden="true"></i>
-                  </span>
-                  <span>Chỉnh sửa</span>
-                </Link>
+            <div style={{ marginBottom: 16 }}>
+              <Typography.Text strong>Địa chỉ email:</Typography.Text>
+              <div style={{ background: "#f5f5f5", padding: 8, borderRadius: 4 }}>
+                {account.email || "-"}
               </div>
             </div>
-          </form>
-        </div>
-      </div>
-    </>
+            <div style={{ marginBottom: 16 }}>
+              <Typography.Text strong>Chức vụ:</Typography.Text>
+              <div style={{ background: "#f5f5f5", padding: 8, borderRadius: 4 }}>
+                {account.role?.name || "-"}
+              </div>
+            </div>
+          </Col>
+          <Col span={12}>
+            <div style={{ marginBottom: 16 }}>
+              <Typography.Text strong>Tài khoản:</Typography.Text>
+              <div style={{ background: "#f5f5f5", padding: 8, borderRadius: 4 }}>
+                {account.username || "-"}
+              </div>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <Typography.Text strong>Mật khẩu:</Typography.Text>
+              <div style={{ background: "#f5f5f5", padding: 8, borderRadius: 4 }}>
+                ******
+              </div>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <Typography.Text strong>Nhập lại mật khẩu:</Typography.Text>
+              <div style={{ background: "#f5f5f5", padding: 8, borderRadius: 4 }}>
+                ******
+              </div>
+            </div>
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={24}>
+            <div style={{ marginBottom: 16 }}>
+              <Typography.Text strong>Ngày thêm:</Typography.Text>
+              <div style={{ background: "#f5f5f5", padding: 8, borderRadius: 4 }}>
+                {account.createdAt
+                  ? moment(account.createdAt).format("(HH:mm:ss) DD/MM/YYYY")
+                  : "-"}
+              </div>
+            </div>
+          </Col>
+        </Row>
+        <Row justify="space-between" style={{ marginTop: 20 }}>
+          <Col>
+            <Link to="/account">
+              <Button danger>
+                <i className="fa-solid fa-circle-xmark" style={{ marginRight: 8 }}></i>
+                Quay lại
+              </Button>
+            </Link>
+          </Col>
+          <Col>
+            <Link to={`/account/update/${account.id}`}>
+              <Button type="primary">
+                <i className="fa-solid fa-pen-to-square" style={{ marginRight: 8 }}></i>
+                Chỉnh sửa
+              </Button>
+            </Link>
+          </Col>
+        </Row>
+      </Card>
+    </div>
   );
 }
-//
-//
+
 export default DetailAccount;

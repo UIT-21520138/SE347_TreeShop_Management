@@ -62,7 +62,7 @@ function UpdateProduct() {
 
   function handleFormsubmit(values) {
     setLoading(true);
-
+  
     // Check values changed
     let reqValue = {};
     Object.keys(values).forEach((key) => {
@@ -70,9 +70,7 @@ function UpdateProduct() {
         reqValue[key] = values[key];
       }
     });
-
-    console.log(reqValue);
-
+  
     fetch("http://localhost:302/api/product" + "/" + id, {
       method: "PUT",
       headers: {
@@ -85,10 +83,7 @@ function UpdateProduct() {
         if (resJson.success) {
           setLoading(false);
           showSuccessNoti();
-          setTimeout(() => {
-            navigate("/product");
-          }, 4000);
-          //navigate('/product')
+          navigate("/product"); // Redirect immediately after success
         } else {
           setLoading(false);
           showErorrNoti();
@@ -99,6 +94,7 @@ function UpdateProduct() {
         showErorrNoti();
       });
   }
+  
 
   //const calc = bacsicForm.values.price * bacsicForm.values.quantity
 

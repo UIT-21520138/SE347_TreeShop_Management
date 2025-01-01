@@ -21,7 +21,17 @@ function AccountRoleInput({ ...props }) {
   }, []);
 
   return (
-    <select {...props} ref={selectElem}>
+    <select
+      {...props}
+      ref={selectElem}
+      style={{
+        width: "100%", 
+        border: "1px solid #d9d9d9", 
+        borderRadius: "4px", 
+        padding: "6px", 
+        fontSize: "14px", 
+      }}
+    >
       <option value="" disabled>
         -- Chọn chức vụ --
       </option>

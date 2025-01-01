@@ -1,9 +1,9 @@
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import * as Yup from "yup";
-import { Formik, useFormik } from "formik";
+import { useFormik } from "formik";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import clsx from "clsx";
+import { Form, Input, Button, Spin, Typography } from "antd";
 import TimeNow from "../../components/TimeNow";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -60,91 +60,63 @@ function AddProductType() {
   }
 
   return (
-    <>
-      <div className="container min-w-full sm:min-w-[650px]">
-        <div className="w-full">
-          <form
-            onSubmit={bacsicForm.handleSubmit}
-            className="mx-2 sm:mx-[15%] rounded-xl border border-slate-300 p-5"
+    <div className="container" style={{ maxWidth: 600, margin: "auto" }}>
+      <Typography.Title level={3} style={{ textAlign: "center", marginBottom: 20, fontWeight: "bold" }}>
+        Thêm loại sản phẩm mới
+      </Typography.Title>
+
+      <Form
+        onFinish={bacsicForm.handleSubmit}
+        layout="vertical"
+        style={{ padding: 20, border: "1px solid #d9d9d9", borderRadius: 10 }}
+      >
+        <Form.Item
+          label={<span style={{ fontWeight: "bold" }}>Tên loại sản phẩm</span>}
+          validateStatus={
+            bacsicForm.touched.name && bacsicForm.errors.name
+              ? "error"
+              : ""
+          }
+          help={
+            bacsicForm.touched.name && bacsicForm.errors.name
+              ? bacsicForm.errors.name
+              : ""
+          }
+        >
+          <Input
+            id="name"
+            name="name"
+            placeholder="Sen đá"
+            value={bacsicForm.values.name}
+            onChange={bacsicForm.handleChange}
+            onBlur={bacsicForm.handleBlur}
+          />
+        </Form.Item>
+
+        <Form.Item label={<span style={{ fontWeight: "bold" }}>Ngày thêm</span>}>
+          <div style={{ background: "#f5f5f5", padding: "8px", borderRadius: "4px" }}>
+            <TimeNow />
+          </div>
+        </Form.Item>
+
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20 }}>
+          <Link to="/product-type">
+            <Button danger type="default">
+              Hủy
+            </Button>
+          </Link>
+          <Button
+            type="primary"
+            htmlType="submit"
+            disabled={!bacsicForm.dirty || loading}
           >
-            <div className="mt-10 flex select-none items-center justify-center">
-              {/* Name */}
-              <div className="flex w-full flex-col space-y-2 text-lg">
-                <div className="form-group flex flex-col ">
-                  <label
-                    className="mb-1 select-none font-semibold"
-                    htmlFor="name"
-                  >
-                    Tên loại sản phẩm
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    className={clsx("text-input w-full py-[5px]", {
-                      invalid:
-                        bacsicForm.touched.name && bacsicForm.errors.name,
-                    })}
-                    onChange={bacsicForm.handleChange}
-                    onBlur={bacsicForm.handleBlur}
-                    value={bacsicForm.values.name}
-                    name="name"
-                    placeholder="Sen đá"
-                  />
-                  <span
-                    className={clsx("text-sm text-red-500 opacity-0", {
-                      "opacity-100":
-                        bacsicForm.touched.name && bacsicForm.errors.name,
-                    })}
-                  >
-                    {bacsicForm.errors.name || "No message"}
-                  </span>
-                </div>
-
-                <div className="form-group flex w-full flex-col ">
-                  <label className="mb-1 cursor-default select-none text-lg font-semibold ">
-                    Ngày thêm
-                  </label>
-                  <div className="text-input disabled w-full select-none">
-                    <TimeNow />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between border-t pt-6">
-              <div
-                className={clsx("flex items-center text-blue-500", {
-                  invisible: !loading,
-                })}
-              >
-                <i className="fa-solid fa-spinner animate-spin text-xl"></i>
-                <span className="text-lx pl-3 font-medium">
-                  Đang tạo thông tin loại sản phẩm
-                </span>
-              </div>
-              <div className="flex mt-4 sm:mt-0">
-                <Link to={"/product-type"} className="btn btn-red btn-md">
-                  <span className="pr-2">
-                    <i className="fa-solid fa-circle-xmark"></i>
-                  </span>
-                  <span>Hủy</span>
-                </Link>
-                <button
-                  type="submit"
-                  className="btn btn-blue btn-md ml-4"
-                  disabled={!bacsicForm.dirty || loading}
-                >
-                  <span className="pr-2">
-                    <i className="fa-solid fa-circle-plus"></i>
-                  </span>
-                  <span>Thêm</span>
-                </button>
-              </div>
-            </div>
-          </form>
+            {loading ? <Spin size="small" style={{ marginRight: 8 }} /> : null}
+            Thêm
+          </Button>
         </div>
-      </div>
-    </>
+      </Form>
+      <ToastContainer />
+    </div>
   );
 }
 

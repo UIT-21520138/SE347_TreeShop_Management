@@ -1,18 +1,15 @@
-import { Fragment, useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-
-import TypeProduct from "../../components/TypeProduct";
-import clsx from "clsx";
-import { useEffect } from "react";
-
+import { Row, Col, Form, Button, Image, Typography } from "antd";
 import moment from "moment";
-import TimeNow from "../../components/TimeNow";
-
 import { useSelector } from "react-redux";
 import { accountSelector } from "../../redux/selectors";
 
+const { Title, Text } = Typography;
+
 function DetailTree() {
   const account = useSelector(accountSelector);
+
   function isHiddenItem(functionName) {
     if (!account) {
       return true;
@@ -23,35 +20,26 @@ function DetailTree() {
     const findResult = account?.functions?.find(
       (_func) => _func?.name === functionName
     );
-    if (findResult) {
-      return false;
-    }
-    return true;
+    return !findResult;
   }
 
   const [img, setImg] = useState();
-
-  useEffect(() => {
-    //cleanup
-    return () => {
-      img && URL.revokeObjectURL(img.preview);
-    };
-  }, [img]);
-
   const [product, setProduct] = useState({});
+  const { id } = useParams();
+
   useEffect(() => {
-    //cleanup
+    // Cleanup
     return () => {
       img && URL.revokeObjectURL(img.preview);
     };
   }, [img]);
-  const { id } = useParams();
+
   useEffect(() => {
     callApi();
   }, []);
 
   function callApi() {
-    fetch("http://localhost:302/api/product" + "/" + id)
+    fetch(`http://localhost:302/api/product/${id}`)
       .then((res) => res.json())
       .then((resJson) => {
         if (resJson.success) {
@@ -64,146 +52,73 @@ function DetailTree() {
 
   return (
     <div className="container">
-      <div className="w-full">
-        <div className="mt-4 flex flex-col sm:flex-row">
-          <div className="mr-0 sm:mr-8 mt-3 flex w-full sm:w-1/2 flex-col space-y-4 text-lg">
-            <div className="form-group mt-10 flex flex-col">
-              <label
-                className="mb-1 cursor-default font-semibold "
-                htmlFor="name"
-              >
-                Mã sản phẩm
-              </label>
-              <div
-                id="name"
-                className="text-input disabled select-none py-[5px]"
-              >
-                {product.id}
-              </div>
-            </div>
-            <div className="form-group flex flex-col ">
-              <label
-                className="mb-1 cursor-default font-semibold "
-                htmlFor="name"
-              >
-                Tên cây
-              </label>
-              <div
-                id="name"
-                className="text-input disabled select-none py-[5px]"
-              >
-                {product.name}
-              </div>
-            </div>
-          </div>
+      <Title level={3}>Chi tiết cây</Title>
 
-          <div className="form-group w-full sm:w-1/2 flex-col items-center justify-items-center mt-4 sm:mt-0">
-            <div className="h-60 w-full select-none overflow-hidden rounded border border-slate-300 bg-slate-50">
-              <img
+      <Row gutter={16} className="mt-4">
+        {/* 2 cột text */}
+        <Col xs={24} sm={8}>
+          <Form layout="vertical">
+            <Form.Item label={<Text strong>Mã sản phẩm</Text>}>
+              <Text>{product.id}</Text>
+            </Form.Item>
+            <Form.Item label={<Text strong>Loại cây</Text>}>
+              <Text>{product?.type?.name}</Text>
+            </Form.Item>
+            <Form.Item label={<Text strong>Ngày nhập cây</Text>}>
+              <Text>
+                {moment(product.createdAt).format("HH:mm:ss DD/MM/YYYY")}
+              </Text>
+            </Form.Item>
+          </Form>
+        </Col>
+
+        <Col xs={24} sm={8}>
+          <Form layout="vertical">
+            <Form.Item label={<Text strong>Tên cây</Text>}>
+              <Text>{product.name}</Text>
+            </Form.Item>
+            <Form.Item label={<Text strong>Số lượng</Text>}>
+              <Text>{product.quantity}</Text>
+            </Form.Item>
+            <Form.Item label={<Text strong>Giá</Text>}>
+              <Text>
+                {product.price} VNĐ
+              </Text>
+            </Form.Item>
+          </Form>
+        </Col>
+
+        {/* Ảnh ở cột thứ 3 */}
+        <Col xs={24} sm={8}>
+          <Form layout="vertical">
+            <Form.Item label={<Text strong>Hình ảnh</Text>}>
+              <Image
                 src={product.image}
-                alt=""
-                className="h-full w-full object-contain"
+                alt={product.name}
+                width="100%"
+                style={{ maxHeight: "240px", objectFit: "contain" }}
               />
-            </div>
-          </div>
-        </div>
+            </Form.Item>
+          </Form>
+        </Col>
+      </Row>
 
-        <div className="mt-4 flex flex-col sm:flex-row">
-          <div className="form-group mr-0 sm:mr-4 mt-3 flex w-full sm:basis-1/2 flex-col">
-            <label
-              className="mb-1 cursor-default text-lg font-semibold"
-              htmlFor="type"
-            >
-              Loại cây
-            </label>
-            <div
-              id="name"
-              className="text-input disabled  select-none py-[5px]"
-            >
-              {product?.type?.name}
-            </div>
-          </div>
-
-          <div className="form-group ml-0 sm:ml-4 mt-3 flex w-full sm:basis-1/2 flex-col">
-            <label
-              className="mb-1 cursor-default text-lg font-semibold"
-              htmlFor="quantity"
-            >
-              Số lượng
-            </label>
-            <div id="quantity" className="ml-lg text-input disabled py-[5px]">
-              {product.quantity}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-2 flex flex-col sm:flex-row">
-          <div className="form-group mr-0 sm:mr-4 mt-3 flex w-full sm:basis-1/2 flex-col">
-            <label
-              className="mb-1 cursor-default text-lg font-semibold"
-              htmlFor="date"
-            >
-              Ngày nhập cây
-            </label>
-            <div className="text-input disabled py-[5px] text-xl">
-              {moment(product.createdAt).format("HH:mm:ss DD/MM/YYYY ")}
-            </div>
-          </div>
-
-          <div className="ml-0 sm:ml-4 mt-3 flex w-full sm:basis-1/2 flex-col">
-            <label
-              className="mb-1 cursor-default text-lg font-semibold"
-              htmlFor="price"
-            >
-              Giá
-            </label>
-            <div className="relative">
-              <div
-                id="price"
-                className="text-input disabled w-full select-none py-[5px]"
-              >
-                {product.price}
-              </div>
-              <label
-                htmlFor="price"
-                className="lb-value absolute top-0 right-0 select-none px-[6%] py-1 text-lg text-gray-600"
-              >
-                VNĐ
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
-          <Link
-            to={"/product"}
-            className="btn btn-blue btn-md w-full sm:w-auto"
-          >
-            <span className="pr-2">
-              <i className="fa-solid fa-circle-xmark"></i>
-            </span>
-            <span>Quay lại</span>
+      <Row justify="end" className="mt-8">
+        <Col>
+          <Link to="/product">
+            <Button type="default" danger className="mr-4">
+              Quay lại
+            </Button>
           </Link>
-
-          <Link
-            to={"/product/update/" + product.id}
-            className={clsx(
-              "btn btn-md btn-green w-full sm:w-auto mt-2 sm:mt-0",
-              {
-                hidden: isHiddenItem("product/update"),
-              }
-            )}
-          >
-            <span className="pr-2">
-              <i className="fa fa-share" aria-hidden="true"></i>
-            </span>
-            <span>Chỉnh sửa</span>
-          </Link>
-        </div>
-      </div>
+          {!isHiddenItem("product/update") && (
+            <Link to={`/product/update/${product.id}`}>
+              <Button type="primary">Chỉnh sửa</Button>
+            </Link>
+          )}
+        </Col>
+      </Row>
     </div>
   );
 }
-//
-//
+
 export default DetailTree;

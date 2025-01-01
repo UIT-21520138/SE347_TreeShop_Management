@@ -1,16 +1,18 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom";
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { Button, Typography, Card, Row, Col } from "antd";
 import moment from "moment";
 import clsx from "clsx";
 import { useSelector } from "react-redux";
 import { accountSelector } from "../../redux/selectors";
 
+const { Title, Text } = Typography;
+
 function DetailTypeProduct() {
   const { id } = useParams();
   const [productType, setProductType] = useState({});
   const account = useSelector(accountSelector);
+
   function isHiddenItem(functionName) {
     if (!account) {
       return true;
@@ -26,12 +28,13 @@ function DetailTypeProduct() {
     }
     return true;
   }
+
   useEffect(() => {
     callApi();
   }, []);
 
   function callApi() {
-    fetch("http://localhost:302/api/product-type" + "/" + id)
+    fetch("http://localhost:302/api/product-type/" + id)
       .then((res) => res.json())
       .then((resJson) => {
         if (resJson.success) {
@@ -41,76 +44,57 @@ function DetailTypeProduct() {
         }
       });
   }
+
   return (
-    <div className="container mx-auto px-4 sm:px-6 md:px-8">
-      <div className="wrapper mx-[10%] rounded-xl border border-slate-300 p-5">
-        <div className="mt-4 flex flex-col sm:flex-row">
-          <div className="mt-[4%] flex w-full sm:w-1/2 flex-col">
-            <label className="mb-1 cursor-default text-lg font-semibold">
-              Mã loại sản phẩm
-            </label>
-            <div className="text-input disabled select-none py-[5px]">
-              {productType.id}
+    <div style={{ maxWidth: 800, margin: "0 auto", padding: 20 }}>
+      <Card
+        title={<Title level={3} style={{ textAlign: "center" }}>Chi tiết loại sản phẩm</Title>}
+        bordered={false}
+      >
+        {/* Product Type Details */}
+        <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
+          <Col span={12}>
+            <Text strong>Mã loại sản phẩm</Text>
+            <div style={{ padding: 10, background: "#f5f5f5", borderRadius: 4 }}>
+              {productType.id || "-"}
             </div>
-          </div>
-        </div>
+          </Col>
+          <Col span={12}>
+            <Text strong>Tên loại sản phẩm</Text>
+            <div style={{ padding: 10, background: "#f5f5f5", borderRadius: 4 }}>
+              {productType.name || "-"}
+            </div>
+          </Col>
+        </Row>
 
-        <div className="mt-4 flex flex-col sm:flex-row">
-          <div className="mt-2 flex w-full sm:w-1/2 flex-col">
-            <label
-              className="mb-1 cursor-default text-lg font-semibold"
-              htmlFor="name"
+        <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
+          <Col span={12}>
+            <Text strong>Ngày thêm</Text>
+            <div style={{ padding: 10, background: "#f5f5f5", borderRadius: 4 }}>
+              {moment(productType.createdAt).format("(HH:mm:ss) DD/MM/YYYY") || "-"}
+            </div>
+          </Col>
+        </Row>
+
+        {/* Actions */}
+        <Row justify="end" gutter={16} style={{ marginTop: 20 }}>
+          <Col>
+            <Link to="/product-type">
+              <Button type="default">Quay lại</Button>
+            </Link>
+          </Col>
+          <Col>
+            <Link
+              to={"/product-type/update/" + productType.id}
+              className={clsx({ hidden: isHiddenItem("product-type/update") })}
             >
-              Tên loại sản phẩm
-            </label>
-            <div className="text-input disabled select-none py-[5px]">
-              {productType.name}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-4 mb-4 flex flex-col sm:flex-row">
-          <div className="mt-2 flex w-full sm:w-1/2 flex-col">
-            <label
-              className="mb-1 cursor-default text-lg font-semibold"
-              htmlFor="date"
-            >
-              Ngày thêm
-            </label>
-            <div className="text-input disabled select-none py-[5px]">
-              {moment(productType.createdAt).format(
-                "(HH:mm:ss)     DD/MM/YYYY"
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 flex flex-col sm:flex-row items-center justify-end border-t pt-6">
-          <Link
-            to={"/product-type"}
-            className="btn btn-blue btn-md mb-2 sm:mb-0 sm:mr-2"
-          >
-            <span className="pr-1">
-              <i className="fa-solid fa-circle-xmark"></i>
-            </span>
-            <span>Quay lại</span>
-          </Link>
-          <Link
-            to={"/product-type/update/" + productType.id}
-            className={clsx("btn btn-md btn-blue", {
-              hidden: isHiddenItem("product-type/update"),
-            })}
-          >
-            <span className="pr-2">
-              <i className="fa fa-share" aria-hidden="true"></i>
-            </span>
-            <span>Chỉnh sửa</span>
-          </Link>
-        </div>
-      </div>
+              <Button type="primary">Chỉnh sửa</Button>
+            </Link>
+          </Col>
+        </Row>
+      </Card>
     </div>
   );
 }
-//
-//
+
 export default DetailTypeProduct;

@@ -2,10 +2,25 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import {
+  Table,
+  Button,
+  Input,
+  Modal,
+  Space,
+  Typography,
+  Row,
+  Col,
+} from "antd";
+import {
+  PlusOutlined,
+  ReloadOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import Filter from "./Filter";
 import PriceFormat from "../../components/PriceFormat";
-import clsx from "clsx";
-
 import { useSelector } from "react-redux";
 import { accountSelector } from "../../redux/selectors";
 
@@ -45,8 +60,13 @@ function Products() {
       });
   }
 
-  function deleteProduct(id) {
-    fetch("http://localhost:302/api/product/" + id, {
+  const confirmDeleteProduct = (id) => {
+    setShowDeleteDialog(true);
+    setDeletingProductId(id);
+  };
+
+  function deleteProduct() {
+    fetch("http://localhost:302/api/product/" + deletingProductId, {
       method: "DELETE",
     })
       .then((res) => res.json())
@@ -69,209 +89,153 @@ function Products() {
     navigate("/product/detail/" + id);
   }
 
+  const columns = [
+    {
+      title: "Mã số",
+      dataIndex: "id",
+      key: "id",
+      render: (text, record) => (
+        <Typography.Link onClick={() => linkToDetail(record.id)}>
+          {text}
+        </Typography.Link>
+      ),
+    },
+    {
+      title: "Ảnh",
+      dataIndex: "image",
+      key: "image",
+      render: (image) => (
+        <img
+          src={image || "/placeholder.png"}
+          alt="product"
+          style={{ width: 40, height: 40, borderRadius: "50%" }}
+        />
+      ),
+    },
+    {
+      title: "Tên sản phẩm",
+      dataIndex: "name",
+      key: "name",
+      render: (text, record) => (
+        <Typography.Link onClick={() => linkToDetail(record.id)}>
+          {text}
+        </Typography.Link>
+      ),
+    },
+    {
+      title: "Loại sản phẩm",
+      dataIndex: ["type", "name"],
+      key: "type",
+    },
+    {
+      title: "Giá (VND)",
+      dataIndex: "price",
+      key: "price",
+      render: (price) => <PriceFormat>{price}</PriceFormat>,
+    },
+    {
+      title: "Số lượng",
+      dataIndex: "quantity",
+      key: "quantity",
+      render: (quantity) => (
+        <span style={{ color: quantity === 0 ? "red" : "inherit" }}>
+          {quantity}
+        </span>
+      ),
+    },
+    {
+      title: "Hành động",
+      key: "action",
+      render: (_, record) => (
+        <Space size="middle">
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/product/edit/${record.id}`)}
+          >
+            Sửa
+          </Button>
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => confirmDeleteProduct(record.id)}
+          >
+            Xóa
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  const filteredProducts = products.filter((product) => {
+    if (!search) return true;
+    const searchText = removeVietnameseTones(search.toLowerCase());
+    return (
+      removeVietnameseTones(product.name.toLowerCase()).includes(searchText) ||
+      removeVietnameseTones(product?.type?.name?.toLowerCase() || "").includes(
+        searchText
+      )
+    );
+  });
+
   return (
-    <>
-      <div className="container">
-        <div className="flex space-x-4">
-          {/* title + reload btn */}
-          <div className="flex">
-            <label className="text-2xl font-bold text-slate-800">
-              Danh sách sản phẩm
-            </label>
-            <button
-              type="button"
-              className="ml-3 text-gray-800 hover:underline"
-              onClick={() => getProducts()}
-            >
-              <span className="font-sm pr-1">
-                <i className="fa fa-refresh" aria-hidden="true"></i>
-              </span>
-              <span>Tải lại</span>
-            </button>
-          </div>
-
-          {/* Action group */}
-          <div className="flex grow">
-            {/* Search */}
-            <div className="mr-2 flex grow">
-              <input
-                type="text"
-                className="text-input grow"
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                }}
-                placeholder="Tìm kiếm sản phẩm"
-              />
-            </div>
-
-            {/* FILTER */}
+    <div className="container">
+      <div style={{ marginBottom: 16 }}>
+        <Space style={{ width: "100%", justifyContent: "space-between" }}>
+          <Typography.Title level={3}>Danh sách sản phẩm</Typography.Title>
+          <Button
+            onClick={() => getProducts()}
+            icon={<i className="fa fa-refresh" />}
+          >
+            Tải lại
+          </Button>
+        </Space>
+        <Row style={{ marginTop: 16 }} gutter={[16, 16]} align="middle">
+          <Col flex="auto">
+            <Input
+              placeholder="Tìm kiếm sản phẩm"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </Col>
+          <Col>
             <Filter
               onChange={(f) => setFilters({ ...f })}
               hasFilters={Object.keys(filters).length > 0}
             />
-
-            <Link to="/product/views" className="btn btn-md btn-green">
-              <span className="pr-1">
-                <i className="fa fa-share"></i>
-              </span>
-              <span>Chuyển sang dạng lưới</span>
-            </Link>
-            <Link to="/product/add" className="btn btn-md btn-green">
-              <span className="pr-1">
-                <i className="fa fa-plus"></i>
-              </span>
-              <span>Thêm sản phẩm mới</span>
-            </Link>
-          </div>
-        </div>
-
-        {/* LIST */}
-        <table className="mt-8 w-full">
-          <thead className="w-full rounded bg-blue-500 text-white">
-            <tr className="flex h-11 min-h-[56px] w-full">
-              <th className="flex w-16 items-center justify-end px-2">Mã số</th>
-              <th className="flex w-24 items-center justify-center px-2">
-                Ảnh
-              </th>
-              <th className="flex flex-[2] items-center justify-start px-2">
-                Tên sản phẩm
-              </th>
-              <th className="flex flex-[1] items-center justify-start px-2">
-                Loại sản phẩm
-              </th>
-              <th className="flex w-28 items-center justify-end px-2">
-                Giá (VND)
-              </th>
-              <th className="flex w-24 items-center justify-end px-2">
-                Số lượng
-              </th>
-              <th className="flex w-[200px] items-center justify-center px-2"></th>
-            </tr>
-          </thead>
-
-          <tbody
-            className="flex h-[75vh] w-full flex-col"
-            style={{ overflowY: "overlay" }}
-          >
-            {products
-              .filter((product) => {
-                if (search === "") {
-                  return product;
-                } else {
-                  if (
-                    removeVietnameseTones(product.name.toLowerCase()).includes(
-                      removeVietnameseTones(search.toLowerCase())
-                    ) ||
-                    removeVietnameseTones(
-                      product?.type.name.toLowerCase()
-                    ).includes(removeVietnameseTones(search.toLowerCase()))
-                  ) {
-                    return true;
-                  }
-                }
-                return false;
-              })
-              .reverse()
-              .map((product) => (
-                <tr
-                  key={product.id}
-                  className={clsx(
-                    "flex cursor-pointer border-b border-slate-200 hover:bg-slate-100"
-                  )}
-                >
-                  <td
-                    className="flex w-16 items-center justify-end px-2 py-2"
-                    onClick={() => linkToDetail(product.id)}
-                  >
-                    {product.id}
-                  </td>
-                  <td
-                    className="flex w-24 items-center justify-center px-2 py-2"
-                    onClick={() => linkToDetail(product.id)}
-                  >
-                    <img
-                      src={product.image || "/placeholder.png"}
-                      className="h-10 w-10 rounded-full object-cover object-center"
-                    />
-                  </td>
-                  <td
-                    className={clsx(
-                      "flex flex-[2] items-center justify-start px-2 py-2",
-                      {
-                        "line-through": product.quantity === 0,
-                      }
-                    )}
-                    onClick={() => linkToDetail(product.id)}
-                  >
-                    {product.name}
-                  </td>
-                  <td
-                    className="flex flex-[1] items-center justify-start px-2 py-2"
-                    onClick={() => linkToDetail(product.id)}
-                  >
-                    {product.type?.name || "-"}
-                  </td>
-                  <td
-                    className="flex w-28 items-center justify-end px-2 py-2"
-                    onClick={() => linkToDetail(product.id)}
-                  >
-                    <PriceFormat>{product.price}</PriceFormat>
-                  </td>
-                  <td
-                    className={clsx(
-                      "flex w-24 items-center justify-end px-2 py-2",
-                      {
-                        "text-red-600": product.quantity === 0,
-                      }
-                    )}
-                    onClick={() => linkToDetail(product.id)}
-                  >
-                    {product.quantity}
-                  </td>
-                  <td className="flex w-[200px] items-center justify-center py-2">
-                    <Link to={`/product/edit/${product.id}`} className="btn btn-sm btn-blue">
-                      Sửa
-                    </Link>
-                    <button
-                      className="btn btn-sm btn-red"
-                      onClick={() => {
-                        setDeletingProductId(product.id);
-                        setShowDeleteDialog(true);
-                      }}
-                    >
-                      Xóa
-                    </button>
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-
-        {/* DELETE Dialog */}
-        {showDeleteDialog && (
-          <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 bg-black">
-            <div className="modal-content p-4 bg-white rounded-lg">
-              <h3>Xóa sản phẩm?</h3>
-              <div className="flex space-x-4 mt-4">
-                <button
-                  className="btn btn-md btn-red"
-                  onClick={() => deleteProduct(deletingProductId)}
-                >
-                  Xóa
-                </button>
-                <button
-          className="btn btn-md bg-gray-500 text-white hover:bg-gray-600"
-          onClick={() => setShowDeleteDialog(false)}
-        >
-          Hủy
-        </button>
-              </div>
-            </div>
-          </div>
-        )}
+          </Col>
+          <Col style={{ display: "flex", justifyContent: "flex-end" }}>
+            <Space>
+              <Link to="/product/views">
+                <Button type="primary">Chuyển sang dạng lưới</Button>
+              </Link>
+              <Link to="/product/add">
+                <Button type="primary">Thêm sản phẩm mới</Button>
+              </Link>
+            </Space>
+          </Col>
+        </Row>
       </div>
+      <Table
+        columns={columns}
+        dataSource={filteredProducts.reverse()}
+        rowKey="id"
+        pagination={{ pageSize: 10 }}
+      />
       <ToastContainer />
-    </>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        title="Xác nhận xóa"
+        visible={showDeleteDialog}
+        onCancel={() => setShowDeleteDialog(false)}
+        onOk={deleteProduct}
+        okText="Xóa"
+        cancelText="Hủy"
+      >
+        Bạn có chắc chắn muốn xóa sản phẩm này không?
+      </Modal>
+    </div>
   );
 }
 
