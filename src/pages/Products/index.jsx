@@ -151,7 +151,7 @@ function Products() {
           <Button
             type="primary"
             icon={<EditOutlined />}
-            onClick={() => navigate(`/product/edit/${record.id}`)}
+            onClick={() => navigate(`/product/update/${record.id}`)}
           >
             Sửa
           </Button>
