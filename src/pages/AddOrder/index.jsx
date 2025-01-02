@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Input,
+  InputNumber,
   Button,
   Table,
   Modal,
@@ -154,6 +155,9 @@ function AddOrder() {
   }, [order, products]);
 
   useEffect(() => {
+    console.log('order.totalPrice',order.totalPrice);
+    console.log('receivedMoney',receivedMoney);
+    console.log('discount',discount);
     setExchangeMoney(receivedMoney - (order?.totalPrice - discount));
   }, [order.totalPrice, receivedMoney, discount]);
 
@@ -164,7 +168,15 @@ function AddOrder() {
     dispatch(orderActions.remove(_id));
   }
   function handleUpdateQuantityProduct(product, quantity) {
-    dispatch(orderActions.updateQuantity({ product, quantity }));
+    if (!product || !product._id) return;
+    
+    dispatch(orderActions.updateQuantity({ 
+        product: {
+            _id: product._id,
+            quantity: product.quantity
+        },
+        quantity: quantity 
+    }));
   }
 
   function createOrder() {
@@ -272,6 +284,7 @@ function AddOrder() {
   <Table
     dataSource={selectedProducts.map((product, index) => ({
       key: index,
+      _id: product?._id,
       id: product?.id,
       image: product?.image,
       name: product?.name,
@@ -319,13 +332,12 @@ function AddOrder() {
         dataIndex: "orderQuantity",
         key: "orderQuantity",
         render: (_, product) => (
-          <Input
-            type="number"
-            min="1"
-            value={product?.orderQuantity || ""}
-            onChange={(e) =>
-              handleUpdateQuantityProduct(product, e.target.value)
-            }
+          <InputNumber
+            min={1}
+            defaultValue={product?.orderQuantity || 1}
+            onChange={(value) => {
+              handleUpdateQuantityProduct(product, value)
+            }}
             style={{ width: "70px" }}
           />
         ),
@@ -475,7 +487,7 @@ function AddOrder() {
                 <Typography.Text strong>Giảm giá: </Typography.Text>
                 <PriceInput
                   value={discount}
-                  onChange={(e) => setDiscount(e.target.value)}
+                  onChange={(value) => setDiscount(value)}
                   style={{ width: 150 }}
                   placeholder="Giảm giá"
                 />
@@ -492,7 +504,10 @@ function AddOrder() {
                 <Typography.Text strong>Tiền nhận: </Typography.Text>
                 <PriceInput
                   value={receivedMoney}
-                  onChange={(e) => setReceivedMoney(e.target.value)}
+                  onChange={(value) => {
+                    setReceivedMoney(value);
+                    
+                  }}
                   style={{ width: 150 }}
                   placeholder="Tiền nhận"
                 />
