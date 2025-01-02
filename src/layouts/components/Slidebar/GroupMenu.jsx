@@ -7,11 +7,32 @@ import { accountSelector } from "../../../redux/selectors";
 function GroupMenu({ groupMenu, setIsSidebarOpen }) {
   const [isOpen, setIsOpen] = useState(false);
   let MainComp = groupMenu.children ? 'div' : Link;
-
+  const account = useSelector(accountSelector);
   const isHiddenItem = (functionName) => {
-    // Giả định đây là một hàm kiểm tra xem item có bị ẩn không
-    // Bạn có thể thay đổi điều kiện theo logic của mình
-    return false; // Ví dụ, không có item nào bị ẩn
+    if (!account) {
+      return true;
+    }
+
+    if(account.role === 'Admin' || account.role === 'Chủ'){
+      return false;
+    }
+
+    if (account?.role === "Staff") {
+      const menuText = groupMenu.main?.text;
+      if (menuText === "Tài khoản" || menuText === "Chức vụ") {
+        return true;
+      }
+      return false;
+    }
+
+    if (!functionName) {
+      return false;
+    }
+    
+    const findResult = account?.functions?.find(
+      (_func) => _func?.name === functionName
+    );
+    return !findResult;
   };
 
   const isHiddenParent = () => {
