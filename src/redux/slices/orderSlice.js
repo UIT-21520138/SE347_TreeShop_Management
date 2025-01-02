@@ -47,14 +47,16 @@ export const orderSlice = createSlice({
 
         // action: {product, quantity}
         updateQuantity: (state, action) => {
-            const indexDetail = state.details.findIndex((detail) => detail.product === action.payload.product._id);
+            const indexDetail = state.details.findIndex((detail) => {
+                console.log('detail.product', detail.product);
+                console.log('action.payload.product._id', action.payload.product._id);
+                return detail.product === action.payload.product._id;
+            });
+            
             if (indexDetail !== -1) {
-                if (action.payload.product.quantity < Number(action.payload.quantity)) {
-                    return state;
-                }
                 state.details[indexDetail].quantity = Number(action.payload.quantity);
+                updateTotalPrice(state);
             }
-            updateTotalPrice(state);
         },
 
         updateCustomer: (state, action) => {
